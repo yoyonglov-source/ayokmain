@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('venues', function (Blueprint $table) {
             $table->id();
+            // BARIS INI WAJIB ADA:
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+            
+            $table->string('name');
+            $table->string('slug');
+            $table->string('category');
+            $table->text('address');
+            $table->string('city');
+            $table->string('phone_number');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

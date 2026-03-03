@@ -2,6 +2,17 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VenueController;
+
+// Pastikan dibungkus middleware 'auth' agar hanya yang login bisa akses
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('venues', VenueController::class);
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Ini akan otomatis membuat route index, create, store, dll
+    Route::resource('venues', VenueController::class);
+});
 
 Route::get('/', function () {
     return view('welcome');
