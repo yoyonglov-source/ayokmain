@@ -45,4 +45,48 @@ class VenueController extends Controller
 
         return redirect()->route('venues.index')->with('success', 'Gedung berhasil didaftarkan!');
     }
+
+    /**
+     * Menampilkan form untuk edit gedung.
+     */
+    public function edit(Venue $venue)
+    {
+        // Security: Pastikan hanya pemilik yang bisa edit
+        if ($venue->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return view('venues.edit', compact('venue'));
+    }
+
+    /**
+     * Proses memperbarui data di database.
+     */
+    public function update(Request $request, Venue $venue)
+    {
+        if ($venue->user_id !== Auth::id()) { abort(403); }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required',
+            'address' => 'required',
+            'city' => 'required',
+            'phone_number' => 'required',
+        ]);
+
+        $venue->update($request->all());
+
+        return redirect()->route('venues.index')->with('success', 'Data gedung berhasil diperbarui!');
+    }
+
+    /**
+     * Menghapus gedung.
+     */
+    public function destroy(Venue $venue)
+    {
+        if ($venue->user_id !== Auth::id()) { abort(403); }
+        
+        $venue->delete();
+
+        return redirect()->route('venues.index')->with('success', 'Gedung telah dihapus.');
+    }
 }
