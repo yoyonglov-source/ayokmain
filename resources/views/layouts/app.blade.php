@@ -1,36 +1,92 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MainYuk</title>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+<body class="bg-gray-100">
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+<div class="flex min-h-screen">
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-emerald-700 text-white flex flex-col">
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+        <!-- Logo -->
+        <div class="px-6 py-5 text-lg font-bold border-b border-emerald-600">
+            🏸 MainYuk
+            <div class="text-xs opacity-70">Admin Partner</div>
         </div>
-    </body>
+
+        <!-- Menu -->
+        <nav class="flex-1 px-4 py-6 space-y-2 text-sm">
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Dashboard
+            </a>
+
+            <a href="/venues" class="block px-4 py-2 rounded-lg bg-emerald-600">
+                Gedung Saya
+            </a>
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Booking Masuk
+            </a>
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Laporan Keuangan
+            </a>
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Manajemen Staff
+            </a>
+
+            <div class="mt-6 text-xs opacity-60 px-4">
+                AKUN
+            </div>
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Pengaturan
+            </a>
+
+            <a href="#" class="block px-4 py-2 rounded-lg hover:bg-emerald-600">
+                Bantuan
+            </a>
+
+        </nav>
+
+        <!-- User -->
+        <div class="p-4 border-t border-emerald-600">
+            <div class="text-sm font-semibold">
+                {{ auth()->user()->name ?? 'User' }}
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col">
+
+        <!-- HEADER -->
+        <header class="bg-white border-b px-6 py-4 flex justify-between items-center">
+
+            <div class="font-semibold text-gray-700">
+                Dashboard
+            </div>
+
+        </header>
+
+        <!-- CONTENT -->
+        <main class="p-6">
+            @yield('content')
+        </main>
+
+    </div>
+
+</div>
+
+</body>
 </html>
