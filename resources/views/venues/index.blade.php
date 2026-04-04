@@ -1,83 +1,55 @@
 @extends('layouts.app')
 
 @section('content')
-
-<div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-bold text-gray-800">
-        Gedung Saya
-    </h2>
-</div>
-
-<!-- GRID -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-    <!-- CARD TAMBAH GEDUNG -->
-    <a href="{{ route('venues.create') }}"
-       class="border-2 border-dashed border-gray-300 rounded-2xl p-6 flex flex-col items-center justify-center text-gray-500 hover:border-emerald-500 hover:text-emerald-600 transition">
-
-        <div class="text-4xl mb-2">+</div>
-        <p class="font-semibold">Tambah Gedung</p>
+    
+    <a href="/venues/create" class="group flex flex-col items-center justify-center p-8 bg-white border-2 border-dashed border-gray-300 rounded-3xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all duration-300 min-h-[320px]">
+        <div class="w-16 h-16 bg-emerald-100/50 text-emerald-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-plus text-2xl"></i>
+        </div>
+        <div class="mt-6 text-center">
+            <h3 class="text-lg font-bold text-gray-800">Tambah Gedung Baru</h3>
+            <p class="mt-2 text-sm text-gray-500 max-w-[200px] leading-relaxed">
+                Daftarkan venue baru untuk mulai menerima pesanan
+            </p>
+        </div>
     </a>
 
-    @forelse($venues as $venue)
-
-    <!-- CARD GEDUNG -->
-    <div class="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition">
-
-        <!-- IMAGE -->
-        <div class="h-40 bg-gray-200">
-            @if($venue->image)
-                <img src="{{ asset('storage/'.$venue->image) }}"
-                     class="w-full h-full object-cover">
-            @endif
+    @foreach($venues as $venue)
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-md">
+        <div class="relative h-48 w-full">
+            <img src="{{ $venue->image_url ?? 'https://via.placeholder.com/400x300' }}" class="w-full h-full object-cover" alt="{{ $venue->name }}">
+            <div class="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                Aktif
+            </div>
         </div>
 
-        <!-- CONTENT -->
-        <div class="p-4">
-
-            <h3 class="font-bold text-gray-800 text-lg">
-                {{ $venue->name }}
-            </h3>
-
-            <p class="text-sm text-gray-500 mt-1">
-                📍 {{ $venue->city }}
-            </p>
-
-            <p class="text-sm text-gray-500 mt-1">
-                🏷 {{ $venue->category }}
-            </p>
-
-            <!-- ACTION -->
-            <div class="flex gap-2 mt-4">
-
-                <a href="{{ route('venues.edit', $venue->id) }}"
-                   class="flex-1 text-center bg-gray-100 text-gray-700 py-2 rounded-lg text-sm">
-                    Edit
-                </a>
-
-                <form action="{{ route('venues.destroy', $venue->id) }}" method="POST" class="flex-1">
-                    @csrf
-                    @method('DELETE')
-                    <button onclick="return confirm('Hapus gedung ini?')"
-                            class="w-full bg-red-100 text-red-600 py-2 rounded-lg text-sm">
-                        Hapus
-                    </button>
-                </form>
-
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{{ $venue->name }}</h3>
+            <div class="flex items-center text-gray-500 text-sm mt-1">
+                <i class="fa-solid fa-location-dot text-emerald-600 mr-2"></i>
+                {{ $venue->location }}
             </div>
 
+            <div class="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-medium">4 Lapangan</span>
+                <a href="/venues/{{ $venue->id }}" class="text-emerald-700 font-bold text-sm hover:underline">
+                    Kelola Detail
+                </a>
+            </div>
         </div>
-
     </div>
-
-    @empty
-
-    <div class="col-span-3 text-center text-gray-400 py-20">
-        Belum ada gedung
-    </div>
-
-    @endforelse
+    @endforeach
 
 </div>
 
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 flex items-start space-x-4">
+        <div class="bg-amber-100 p-3 rounded-xl text-amber-600"><i class="fa-solid fa-image"></i></div>
+        <div>
+            <h4 class="font-bold text-gray-800 text-sm">Foto Menarik</h4>
+            <p class="text-xs text-gray-500 mt-1">Gunakan foto berkualitas tinggi untuk menarik minat pelanggan.</p>
+        </div>
+    </div>
+    </div>
 @endsection
