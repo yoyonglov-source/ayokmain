@@ -22,12 +22,18 @@
         </a>
 
         @foreach($venues as $venue)
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-md">
-            <div class="relative h-52 w-full bg-gray-100">
-                {{-- PERBAIKAN: Gunakan asset('storage/' . $venue->image) --}}
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-md relative">
+            
+            <a href="{{ route('venues.edit', $venue->id) }}" 
+                class="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm p-2.5 rounded-xl shadow-md text-amber-500 
+                    opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 active:scale-90">
+                <i class="fa-solid fa-pen-to-square text-xs"></i>
+            </a>
+
+            <div class="relative h-52 w-full bg-gray-100 overflow-hidden">
                 <img src="{{ $venue->image ? asset('storage/' . $venue->image) : 'https://via.placeholder.com/600x400?text=No+Photo' }}" 
-                     class="w-full h-full object-cover" 
-                     alt="{{ $venue->name }}">
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    alt="{{ $venue->name }}">
                 
                 @if($venue->is_active)
                 <div class="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -46,16 +52,16 @@
                     </h3>
                     <div class="flex items-center text-gray-500 text-sm mt-1">
                         <i class="fa-solid fa-location-dot text-emerald-600 mr-2"></i>
-                        {{-- PERBAIKAN: Gunakan $venue->city sesuai struktur DB anda --}}
                         {{ $venue->city }}
                     </div>
                 </div>
 
                 <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
                     <span class="text-xs text-gray-400 font-medium">
-                        <i class="fa-solid fa-layer-group mr-1"></i> 4 Lapangan
+                        <i class="fa-solid fa-layer-group mr-1"></i> {{ $venue->fields_count }} Lapangan
                     </span>
-                    <a href="{{ route('venues.edit', $venue->id) }}" class="text-emerald-700 font-bold text-sm hover:text-emerald-800 flex items-center">
+                    {{-- Link Kelola Detail Tetap Ada sebagai Tombol Utama --}}
+                    <a href="{{ route('venues.fields.index', $venue->id) }}" class="text-emerald-700 font-bold text-sm hover:text-emerald-800 flex items-center">
                         Kelola Detail <i class="fa-solid fa-chevron-right ml-2 text-[10px]"></i>
                     </a>
                 </div>

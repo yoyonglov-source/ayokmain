@@ -15,7 +15,7 @@ class VenueController extends Controller
 
     public function index()
     {
-        $venues = Auth::user()->venues; 
+        $venues = Auth::user()->venues()->withCount('fields')->get(); 
         return view('venues.index', compact('venues'));
     }
 

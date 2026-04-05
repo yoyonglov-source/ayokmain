@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('fields', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('venue_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('field_type');
+            $table->decimal('price_regular', 10, 2);
+            $table->decimal('price_peak', 10, 2);
+            $table->string('image')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true); // Pastikan kolom ini ada
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('fields');
     }
 };
