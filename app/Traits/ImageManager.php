@@ -2,39 +2,36 @@
 
 namespace App\Traits;
 
-use Intervention\Image\ImageManager as ImageLib;
-use Intervention\Image\Drivers\Gd\Driver as GdDriver;
-use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager as ImageProcessor;
+use Intervention\Image\Drivers\Gd\Driver;
 
-trait ImageManager {
+trait ImageManager
+{
     public function uploadAndCompress($file, $folder, $name)
     {
-        // 1. Paksa ekstensi file menjadi .webp
-        $filename = time() . '-' . Str::slug($name) . '.webp';
-        $destinationPath = public_path('storage/' . $folder);
+        // 1. Buat nama file unik dengan ekstensi .webp
+        $filename = time() . '_' . str_replace(' ', '_', $name) . '.webp';
+        
+        // 2. Tentukan Path: storage/app/public/uploads/venues atau uploads/fields
+        $subFolder = 'uploads/' . $folder;
+        $path = storage_path('app/public/' . $subFolder);
 
-        if (!File::isDirectory($destinationPath)) {
-            File::makeDirectory($destinationPath, 0777, true, true);
+        // 3. Buat folder jika belum ada
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
         }
 
-        // Coba pakai GD, kalau gagal pakai Imagick
-        try {
-            $manager = new ImageLib(new GdDriver());
-        } catch (\Exception $e) {
-            $manager = new ImageLib(new ImagickDriver());
-        }
+        // 4. Inisialisasi Manager dengan Driver GD (Aman untuk XAMPP)
+        $manager = new ImageProcessor(new Driver());
         
-        $img = $manager->read($file->getRealPath());
-        
-        // 2. Resize proposional (lebar 1000px)
-        $img->scale(width: 1000); 
+        // 5. Proses Gambar: Baca -> Resize/Cover -> Encode ke WebP -> Simpan
+        $manager->read($file)
+            ->cover(1000, 700) // Ukuran standar yang cukup tajam tapi ringan
+            ->toWebp(80)       // Konversi ke WebP dengan kualitas 80% (Sweet Spot Kompresi)
+            ->save($path . '/' . $filename);
 
-        // 3. Konversi ke WebP dan simpan dengan kualitas 80
-        // Method toWebp() akan mengubah data image menjadi format webp sebelum di-save
-        $img->toWebp(80)->save($destinationPath . '/' . $filename);
-
-        return $folder . '/' . $filename;
+        // 6. Return path untuk disimpan ke Database
+        return $subFolder . '/' . $filename;
     }
 }
