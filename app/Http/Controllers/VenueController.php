@@ -6,23 +6,24 @@ use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Traits\ImageManager; // 1. Import Trait
 
 class VenueController extends Controller
 {
-    // Menampilkan daftar gedung milik user yang login
+    use ImageManager; // 2. Gunakan Trait
+
     public function index()
     {
         $venues = Auth::user()->venues; 
         return view('venues.index', compact('venues'));
     }
 
-    // Menampilkan form tambah gedung
     public function create()
     {
         return view('venues.create');
     }
 
-    // Proses simpan data ke database
     public function store(Request $request)
     {
         $request->validate([
@@ -31,36 +32,37 @@ class VenueController extends Controller
             'address' => 'required',
             'city' => 'required',
             'phone_number' => 'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', 
+        ], [
+            'image.required' => 'Wajib mengunggah foto gedung agar tampilan menarik!',
+            'image.max' => 'Ukuran foto maksimal adalah 2MB.',
         ]);
 
-        Venue::create([
-            'user_id' => Auth::id(),
-            'name' => $request->name,
-            'slug' => Str::slug($request->name) . '-' . rand(100, 999),
-            'category' => $request->category,
-            'address' => $request->address,
-            'city' => $request->city,
-            'phone_number' => $request->phone_number,
-        ]);
+        $data = $request->all();
+        $data['user_id'] = Auth::id();
+        $data['slug'] = Str::slug($request->name) . '-' . rand(100, 999);
+        $data['city'] = ucwords(strtolower($request->city));
+
+        // Logika Upload Image (Disesuaikan menggunakan Trait)
+        if ($request->hasFile('image')) {
+            $data['image'] = $this->uploadAndCompress(
+                $request->file('image'), 
+                'venues', 
+                $request->name
+            );
+        }
+
+        Venue::create($data);
 
         return redirect()->route('venues.index')->with('success', 'Gedung berhasil didaftarkan!');
     }
 
-    /**
-     * Menampilkan form untuk edit gedung.
-     */
     public function edit(Venue $venue)
     {
-        // Security: Pastikan hanya pemilik yang bisa edit
-        if ($venue->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($venue->user_id !== Auth::id()) { abort(403); }
         return view('venues.edit', compact('venue'));
     }
 
-    /**
-     * Proses memperbarui data di database.
-     */
     public function update(Request $request, Venue $venue)
     {
         if ($venue->user_id !== Auth::id()) { abort(403); }
@@ -71,20 +73,38 @@ class VenueController extends Controller
             'address' => 'required',
             'city' => 'required',
             'phone_number' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $venue->update($request->all());
+        $data = $request->all();
+        $data['city'] = ucwords(strtolower($request->city));
+
+        if ($request->hasFile('image')) {
+            if ($venue->image) {
+                Storage::disk('public')->delete($venue->image);
+            }
+
+            // Logika Upload Image Baru (Disesuaikan menggunakan Trait)
+            $data['image'] = $this->uploadAndCompress(
+                $request->file('image'), 
+                'venues', 
+                $request->name
+            );
+        }
+
+        $venue->update($data);
 
         return redirect()->route('venues.index')->with('success', 'Data gedung berhasil diperbarui!');
     }
 
-    /**
-     * Menghapus gedung.
-     */
     public function destroy(Venue $venue)
     {
         if ($venue->user_id !== Auth::id()) { abort(403); }
         
+        if ($venue->image) {
+            Storage::disk('public')->delete($venue->image);
+        }
+
         $venue->delete();
 
         return redirect()->route('venues.index')->with('success', 'Gedung telah dihapus.');
