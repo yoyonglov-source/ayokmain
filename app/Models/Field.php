@@ -23,6 +23,11 @@ class Field extends Model
         'is_active',
     ];
 
+    public function breaks()
+    {
+        return $this->hasMany(FieldBreak::class);
+    }
+
     /**
      * Relasi Balik ke Venue (Gedung)
      */

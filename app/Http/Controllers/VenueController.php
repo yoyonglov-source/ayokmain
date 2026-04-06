@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\ImageManager; // 1. Import Trait
+use App\Models\OperatingHour;
 
 class VenueController extends Controller
 {
@@ -24,7 +25,7 @@ class VenueController extends Controller
         return view('venues.create');
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -43,7 +44,7 @@ class VenueController extends Controller
         $data['slug'] = Str::slug($request->name) . '-' . rand(100, 999);
         $data['city'] = ucwords(strtolower($request->city));
 
-        // Logika Upload Image (Disesuaikan menggunakan Trait)
+        // Logika Upload Image
         if ($request->hasFile('image')) {
             $data['image'] = $this->uploadAndCompress(
                 $request->file('image'), 
@@ -52,14 +53,36 @@ class VenueController extends Controller
             );
         }
 
-        Venue::create($data);
+        // --- INI PERBAIKANNYA: TAMBAHKAN $venue = ---
+        $venue = Venue::create($data);
 
-        return redirect()->route('venues.index')->with('success', 'Gedung berhasil didaftarkan!');
+        // OTOMATISASI JAM OPERASIONAL
+        $days = [
+            0 => 'Minggu',
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu'
+        ];
+
+        foreach ($days as $index => $name) {
+            OperatingHour::create([
+                'venue_id'   => $venue->id, 
+                'day'        => $index,
+                'open_time'  => '07:00', 
+                'close_time' => '23:00', 
+                'is_closed'  => false,
+            ]);
+        }
+
+        return redirect()->route('venues.index')->with('success', 'Gedung dan Jam Operasional default berhasil dibuat!');
     }
-
     public function edit(Venue $venue)
     {
         if ($venue->user_id !== Auth::id()) { abort(403); }
+        $venue->load('operatingHours');
         return view('venues.edit', compact('venue'));
     }
 

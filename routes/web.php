@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\FieldController; // Import Controller baru nanti
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\FieldBreakController;
+use App\Http\Controllers\OperatingHourController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,7 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // --- MANAJEMEN GEDUNG ---
     Route::resource('venues', VenueController::class);
-
+    Route::post('/field-breaks', [FieldBreakController::class, 'store'])->name('field-breaks.store');
+    Route::delete('/field-breaks/{id}', [FieldBreakController::class, 'destroy'])->name('field-breaks.destroy');
+    Route::put('/operating-hours/{operatingHour}', [OperatingHourController::class, 'update'])->name('operating-hours.update');
     // --- MANAJEMEN LAPANGAN (Nested) ---
     // URL akan menjadi: /venues/{venue}/fields
     Route::prefix('venues/{venue}')->group(function () {

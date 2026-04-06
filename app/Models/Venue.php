@@ -27,4 +27,10 @@ class Venue extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Tambahkan di dalam class Venue
+    public function operatingHours()
+    {
+        return $this->hasMany(OperatingHour::class);
+    }
+
 }
