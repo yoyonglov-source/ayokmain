@@ -44,7 +44,7 @@ class FieldController extends Controller
             'field_type' => 'required',
             'price_regular' => 'required|numeric',
             'price_peak' => 'required|numeric',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:10240',
             'description' => 'nullable|string',
         ]);
 

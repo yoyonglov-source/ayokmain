@@ -32,7 +32,7 @@ class VenueController extends Controller
             'address' => 'required',
             'city' => 'required',
             'phone_number' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', 
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240', 
         ], [
             'image.required' => 'Wajib mengunggah foto gedung agar tampilan menarik!',
             'image.max' => 'Ukuran foto maksimal adalah 2MB.',
