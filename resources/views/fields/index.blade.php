@@ -11,6 +11,23 @@
                 <span class="text-gray-800 font-medium">{{ $venue->name }}</span>
             </nav>
             <h1 class="text-2xl font-bold text-gray-800">Kelola Lapangan</h1>
+            @if (session('success'))
+                <div id="alert-success" class="relative mb-4 p-4 pr-12 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200">
+                    <i class="fa-solid fa-circle-check mr-2"></i> {{ session('success') }}
+                    <button onclick="document.getElementById('alert-success').remove()" class="absolute top-4 right-4 text-emerald-500 hover:text-emerald-800 transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div id="alert-error" class="relative mb-4 p-4 pr-12 bg-red-100 text-red-700 rounded-2xl border border-red-200">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> <strong>Waduh!</strong> {{ session('error') }}
+                    <button onclick="document.getElementById('alert-error').remove()" class="absolute top-4 right-4 text-red-500 hover:text-red-800 transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            @endif
             <p class="text-sm text-gray-500">Atur detail dan harga lapangan di {{ $venue->name }}</p>
         </div>
     </div>
