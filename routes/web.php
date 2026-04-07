@@ -20,8 +20,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // --- MANAJEMEN GEDUNG ---
     Route::resource('venues', VenueController::class);
-    Route::post('/field-breaks', [App\Http\Controllers\Admin\FieldBreakController::class, 'store'])->name('field-breaks.store');
-    Route::delete('/field-breaks/{id}', [FieldBreakController::class, 'destroy'])->name('field-breaks.destroy');
+    Route::middleware(['auth'])->prefix('admin')->group(function () {     
+        Route::post('/field-breaks', [FieldBreakController::class, 'store'])->name('admin.field-breaks.store');
+        Route::delete('/field-breaks/{id}', [FieldBreakController::class, 'destroy'])->name('admin.field-breaks.destroy');
+    });
     Route::put('/operating-hours/{operatingHour}', [OperatingHourController::class, 'update'])->name('operating-hours.update');
     // --- MANAJEMEN LAPANGAN (Nested) ---
     // URL akan menjadi: /venues/{venue}/fields
