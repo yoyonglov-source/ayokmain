@@ -16,66 +16,103 @@ class FieldBreakController extends Controller
         $request->validate([
             'field_id'   => 'required|exists:fields,id',
             'start_time' => 'required',
-            'end_time'   => 'required|after:start_time', 
+            'end_time'   => 'required', 
             'date'       => 'nullable|date|after_or_equal:today',
             'reason'     => 'nullable|string|max:255',
         ]);
 
-        // 2. Cari Lapangan & Cek/Reset Kuota (Logic di Model Field)
         $field = Field::findOrFail($request->field_id);
         $field->checkAndResetQuota();
 
-        // 3. Hitung Durasi yang Diminta (Menit)
-        $start = Carbon::parse($request->start_time);
-        $end = Carbon::parse($request->end_time);
-        $duration = $start->diffInMinutes($end);
+        $startReq = Carbon::parse($request->start_time);
+        $endReq = Carbon::parse($request->end_time);
+        
+        // Proteksi jika end_time melewati tengah malam
+        if ($endReq->lt($startReq)) {
+            $endReq->addDay();
+        }
 
-        // 4. KUNCI BISNIS: Cek sisa kuota mingguan
-        if ($duration > $field->break_quota_minutes) {
-            return back()->with('error', "Gagal! Durasi ($duration menit) melebihi sisa jatah gratis Anda minggu ini ({$field->break_quota_minutes} menit).");
+        // --- LOGIKA PROPORSIONAL JAM OPERASIONAL ---
+        
+        // Ambil hari (0 = Sunday, 1 = Monday, dst) untuk cari jam operasional
+        $targetDate = $request->date ? Carbon::parse($request->date) : now();
+        $dayName = $targetDate->format('l'); // Mendapatkan nama hari dalam Inggris (e.g., "Monday")
+
+        $opHour = \App\Models\OperatingHour::where('venue_id', $field->venue_id)
+                    ->where('day', $dayName)
+                    ->first();
+
+        $minutesToCharge = 0;
+        $totalDuration = $startReq->diffInMinutes($endReq);
+
+        if ($opHour && !$opHour->is_closed) {
+            $openTime = Carbon::parse($opHour->open_time);
+            $closeTime = Carbon::parse($opHour->close_time);
+            
+            // Sesuaikan tanggal jam operasional dengan tanggal request
+            $openTime->setDate($startReq->year, $startReq->month, $startReq->day);
+            $closeTime->setDate($startReq->year, $startReq->month, $startReq->day);
+            
+            // Jika jam tutup melewati tengah malam (misal tutup jam 01:00 pagi)
+            if ($closeTime->lt($openTime)) {
+                $closeTime->addDay();
+            }
+
+            // Hitung irisan (intersection) antara waktu request dan waktu operasional
+            $overlapStart = $startReq->gt($openTime) ? $startReq : $openTime;
+            $overlapEnd = $endReq->lt($closeTime) ? $endReq : $closeTime;
+
+            if ($overlapStart->lt($overlapEnd)) {
+                $minutesToCharge = $overlapStart->diffInMinutes($overlapEnd);
+            }
+        }
+
+        // --- AKHIR LOGIKA PROPORSIONAL ---
+
+        // 4. KUNCI BISNIS: Cek sisa kuota mingguan (Hanya yang kena charge)
+        if ($minutesToCharge > $field->break_quota_minutes) {
+            return back()->with('error', "Gagal! Durasi di jam operasional ($minutesToCharge menit) melebihi jatah gratis Anda ({$field->break_quota_minutes} menit).");
         }
 
         // 5. Simpan Data ke Tabel field_breaks
-        FieldBreak::create($request->all());
+        FieldBreak::create([
+            'field_id'      => $request->field_id,
+            'date'          => $request->date,
+            'start_time'    => $request->start_time,
+            'end_time'      => $request->end_time,
+            'reason'        => $request->reason,
+            'minutes_saved' => $minutesToCharge,
+        ]);
 
-        // 6. POTONG KUOTA: Update sisa kuota di tabel fields
-        $field->decrement('break_quota_minutes', $duration);
+        // 6. POTONG KUOTA (Cukup satu blok saja agar tidak double decrement)
+        if ($minutesToCharge > 0) {
+            $field->decrement('break_quota_minutes', $minutesToCharge);
+            $msg = "Berhasil! Kuota terpotong: $minutesToCharge menit (di jam operasional).";
+        } else {
+            $msg = "Berhasil! Tidak memotong kuota karena di luar jam operasional.";
+        }
 
-        return back()->with('success', "Jadwal istirahat lapangan berhasil ditambahkan! Kuota terpakai: $duration menit.");
-    }
+            return back()->with('success', $msg);
+        }
 
     public function destroy($id)
-{
-        // 1. Cari data blokir yang mau dihapus
+    {
         $break = FieldBreak::findOrFail($id);
-        
-        // 2. Cari lapangannya untuk proses refund
         $field = Field::find($break->field_id);
 
-        if ($field) {
-            // 3. Hitung durasi yang akan dikembalikan
-            $start = Carbon::parse($break->start_time);
-            $end = Carbon::parse($break->end_time);
-            
-            // Proteksi jika jam selesai melewati tengah malam
-            if ($end->lt($start)) {
-                $end->addDay();
-            }
+        // Ambil angka yang dulu benar-benar dipotong saat simpan
+        $refundAmount = $break->minutes_saved; 
 
-            $duration = $start->diffInMinutes($end);
-
-            // 4. PROSES REFUND: Tambahkan kembali jatah menit ke kolom break_quota_minutes
-            $field->increment('break_quota_minutes', $duration);
+        if ($field && $refundAmount > 0) {
+            $field->increment('break_quota_minutes', $refundAmount);
             
-            // Opsional: Batasi agar refund tidak membuat kuota lebih dari 120 menit (jika perlu)
             if ($field->break_quota_minutes > 120) {
                 $field->update(['break_quota_minutes' => 120]);
             }
         }
 
-        // 5. Hapus data dari tabel field_breaks
         $break->delete();
 
-        return back()->with('success', "Jadwal berhasil dibuka kembali. Jatah $duration menit telah dikembalikan ke Kuota Anda.");
+        return back()->with('success', "Jadwal dibuka kembali. Saldo dikembalikan: $refundAmount menit.");
     }
 }
