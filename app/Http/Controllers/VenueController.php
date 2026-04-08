@@ -73,6 +73,8 @@ class VenueController extends Controller
                 'day'        => $index,
                 'open_time'  => '07:00', 
                 'close_time' => '23:00', 
+                'peak_start' => '17:00', // Default jam sibuk mulai
+                'peak_end'   => '22:00', // Default jam sibuk berakhir
                 'is_closed'  => false,
             ]);
         }

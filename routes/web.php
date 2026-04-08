@@ -18,6 +18,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
+    Route::prefix('settings')->group(function () {
+        Route::get('/operating-hours', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.operating-hours');
+        Route::post('/operating-hours/update', [App\Http\Controllers\SettingController::class, 'updateHours'])->name('settings.operating-hours.update');
+    });
+
     // --- MANAJEMEN GEDUNG ---
     Route::resource('venues', VenueController::class);
     Route::middleware(['auth'])->prefix('admin')->group(function () {     
