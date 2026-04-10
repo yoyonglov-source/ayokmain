@@ -122,13 +122,13 @@
             <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-500 text-xs">
                 <i class="fa-solid fa-bolt"></i>
             </div>
-            <p class="text-[10px] text-gray-500 leading-relaxed"><strong class="text-gray-700 block">Harga Peak Time</strong> Biasanya digunakan untuk jam malam atau akhir pekan.</p>
+            <p class="text-[12px] text-gray-500 leading-relaxed"><strong class="text-gray-700 block">Harga Peak Time</strong> Biasanya digunakan untuk jam malam atau akhir pekan.</p>
         </div>
         <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-50">
             <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-xs">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
-            <p class="text-[10px] text-gray-500 leading-relaxed"><strong class="text-gray-700 block">Status Aktif</strong> Lapangan yang baru dibuat akan langsung berstatus aktif.</p>
+            <p class="text-[12px] text-gray-500 leading-relaxed"><strong class="text-gray-700 block">Status Aktif</strong> Lapangan yang baru dibuat akan langsung berstatus aktif.</p>
         </div>
     </div>
 </div>

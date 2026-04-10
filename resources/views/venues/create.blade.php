@@ -32,7 +32,7 @@
                             </div>
                             <div class="text-center">
                                 <p class="font-bold text-sm" x-text="imagePreview ? 'Ubah Foto Gedung' : 'Upload Foto Gedung'"></p>
-                                <p class="text-[10px] opacity-70">Format: JPG, PNG, WEBP (Maks. 2MB)</p>
+                                <p class="text-[10px] opacity-70">Format: JPG, PNG, WEBP (Maks. 10MB)</p>
                             </div>
                         </div>
 
