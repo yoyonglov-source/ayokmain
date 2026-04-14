@@ -72,4 +72,43 @@ class FieldController extends Controller
         return redirect()->route('venues.fields.index', $venue->id)
                          ->with('success', "Lapangan $request->name berhasil ditambahkan!");
     }
+
+    public function edit(Venue $venue, Field $field)
+    {
+        // Kita kirimkan $venue dan $field agar Blade bisa menampilkan nama GOR 
+        // dan mengisi value di form edit.
+        return view('fields.edit', compact('venue', 'field'));
+    }
+
+    /**
+     * Memproses pembaruan data lapangan
+     */
+    // Pastikan urutannya: Request, lalu Venue, baru kemudian Field
+    public function update(Request $request, Venue $venue, Field $field)
+    {
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'field_type'    => 'required',
+            'price_regular' => 'required|numeric',
+            'price_peak'    => 'required|numeric',
+            'description'   => 'nullable|string',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            // Opsional: Hapus foto lama agar storage tidak penuh
+            if ($field->image && \Storage::disk('public')->exists($field->image)) {
+                \Storage::disk('public')->delete($field->image);
+            }
+            $data['image'] = $request->file('image')->store('fields', 'public');
+        }
+
+        $field->update($data);
+
+        // Gunakan $venue->id untuk redirect balik ke halaman yang benar
+        return redirect()->route('venues.fields.index', $venue->id)
+                        ->with('success', 'Data lapangan berhasil diperbarui!');
+    }
 }

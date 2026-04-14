@@ -21,6 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('settings')->group(function () {
         Route::get('/operating-hours', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.operating-hours');
         Route::post('/operating-hours/update', [App\Http\Controllers\SettingController::class, 'updateHours'])->name('settings.operating-hours.update');
+        Route::get('/payment-schema', [App\Http\Controllers\SettingController::class, 'paymentSchema'])->name('settings.payment-schema');
+        Route::post('/payment-schema/update', [App\Http\Controllers\SettingController::class, 'updatePaymentSchema'])->name('settings.payment-schema.update');
     });
 
     // --- MANAJEMEN GEDUNG ---

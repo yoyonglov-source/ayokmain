@@ -43,4 +43,40 @@ class SettingController extends Controller
 
         return back()->with('success', 'Jadwal operasional dan harga dinamis berhasil diperbarui!');
     }
+
+    /**
+     * BARU: Menampilkan halaman Skema Pembayaran
+     */
+    public function paymentSchema()
+    {
+        // Kita ambil gedung pertama milik user yang sedang login
+        $venue = Venue::where('user_id', Auth::id())->first();
+
+        // Safety check: jika belum ada gedung, arahkan buat gedung dulu
+        if (!$venue) {
+            return redirect()->route('venues.index')->with('error', 'Silakan buat data gedung terlebih dahulu.');
+        }
+
+        return view('settings.payment-schema', compact('venue'));
+    }
+
+    /**
+     * BARU: Memproses update skema pembayaran
+     */
+    public function updatePaymentSchema(Request $request)
+    {
+        $venue = Venue::where('user_id', Auth::id())->firstOrFail();
+
+        $request->validate([
+            'fee_mode' => 'required|in:addon,deduct',
+            'pg_fee_bearer' => 'required|in:customer,owner',
+        ]);
+
+        $venue->update([
+            'fee_mode' => $request->fee_mode,
+            'pg_fee_bearer' => $request->pg_fee_bearer,
+        ]);
+
+        return redirect()->back()->with('success', 'Skema pembayaran berhasil diperbarui!');
+    }
 }

@@ -91,19 +91,13 @@
                     class="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-emerald-700/30 transition text-xs {{ request()->routeIs('settings.operating-hours') ? 'text-white font-bold bg-emerald-600/20' : 'text-emerald-100/70' }}">
                         <span>Jam & Harga Lapangan</span>
                     </a>
-                    
-                    </div>
+
+                    <a href="{{ route('settings.payment-schema') }}" 
+                    class="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-emerald-700/30 transition text-xs {{ request()->routeIs('settings.payment-schema') ? 'text-white font-bold bg-emerald-600/20' : 'text-emerald-100/70' }}">
+                        <span>Skema Pembayaran</span>
+                    </a>
+                </div>
             </div>
-
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition text-emerald-100/80">
-                <i class="fa-solid fa-circle-question opacity-70 w-5"></i>
-                <span>Bantuan</span>
-            </a>
-
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition text-emerald-100/80">
-                <i class="fa-solid fa-circle-question opacity-70 w-5"></i>
-                <span>Bantuan</span>
-            </a>
 
         </nav>
 

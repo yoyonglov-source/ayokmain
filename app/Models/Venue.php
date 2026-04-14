@@ -12,7 +12,8 @@ class Venue extends Model
     // Field mana saja yang boleh diisi (Security: Mencegah Mass Assignment Vulnerability)
     protected $fillable = [
         'user_id', 'name', 'slug', 'category', 'address', 
-        'city', 'phone_number', 'description', 'image', 'is_active'
+        'city', 'phone_number', 'description', 'image', 'is_active','fee_mode',
+        'pg_fee_bearer'
     ];
 
     // Relasi: Satu Venue punya banyak Lapangan (Fields)
