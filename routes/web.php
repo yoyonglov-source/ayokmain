@@ -43,6 +43,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/fields/{field}', [FieldController::class, 'destroy'])->name('fields.destroy');
     });
 
+    // Route untuk sisi User (End-user)
+    Route::get('/booking/{field_id}', [BookingController::class, 'showStep1'])->name('booking.step1');
+    Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.process');
+    Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->name('checkout.show');
+
 });
 
 // Route Profile Bawaan Laravel Breeze
