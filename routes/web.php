@@ -6,6 +6,7 @@ use App\Http\Controllers\FieldController; // Import Controller baru nanti
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\FieldBreakController;
 use App\Http\Controllers\OperatingHourController;
+use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
     return view('welcome');

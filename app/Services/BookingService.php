@@ -4,38 +4,45 @@ namespace App\Services;
 
 class BookingService
 {
-    public function calculateTotal($basePrice, $venueSettings, $pgFeeEstimate = 4000)
+    public function calculateTotal($basePrice, $venue)
     {
-        $appFee = $venueSettings->platform_fee; // Diambil dari tabel venues
-        $feeMode = $venueSettings->fee_mode; // 'addon' atau 'deduct'
-        $pgBearer = $venueSettings->pg_fee_bearer; // 'customer' atau 'owner'
+        // Mengambil setting asli dari database admin Anda
+        $appFee = 5000; 
+        $pgFeeEstimate = 4000;
 
-        // 1. Hitung apa yang harus dibayar User
-        $userTotal = $basePrice;
-        if ($feeMode === 'addon') {
-            $userTotal += $appFee;
+        // Logic Bearer berdasarkan setting admin
+        // Jika fee_mode adalah 'addon', maka customer yang bayar. Selain itu owner.
+        $appFeeBearer = ($venue->fee_mode === 'addon') ? 'customer' : 'owner';
+        
+        // Jika pg_fee_bearer adalah 'customer', maka customer yang bayar. Selain itu owner.
+        $pgFeeBearer = ($venue->pg_fee_bearer === 'customer') ? 'customer' : 'owner';
+
+        // 1. Hitung TOTAL BAYAR USER
+        $totalUserPay = $basePrice;
+        if ($appFeeBearer === 'customer') {
+            $totalUserPay += $appFee;
         }
-        if ($pgBearer === 'customer') {
-            $userTotal += $pgFeeEstimate;
+        if ($pgFeeBearer === 'customer') {
+            $totalUserPay += $pgFeeEstimate;
         }
 
-        // 2. Hitung apa yang diterima Owner (Net)
-        $ownerNet = $basePrice;
-        if ($feeMode === 'deduct') {
-            $ownerNet -= $appFee;
+        // 2. Hitung NET TERIMA OWNER (Sesuai simulasi gambar admin Anda)
+        $netToOwner = $basePrice;
+        if ($appFeeBearer === 'owner') {
+            $netToOwner -= $appFee;
         }
-        if ($pgBearer === 'owner') {
-            $ownerNet -= $pgFeeEstimate;
+        if ($pgFeeBearer === 'owner') {
+            $netToOwner -= $pgFeeEstimate;
         }
 
         return [
             'base_price' => $basePrice,
             'app_fee' => $appFee,
-            'app_fee_bearer' => ($feeMode === 'addon') ? 'customer' : 'owner',
+            'app_fee_bearer' => $appFeeBearer,
             'pg_fee' => $pgFeeEstimate,
-            'pg_fee_bearer' => $pgBearer,
-            'total_user_pay' => $userTotal,
-            'net_to_owner' => $ownerNet,
+            'pg_fee_bearer' => $pgFeeBearer,
+            'total_user_pay' => $totalUserPay,
+            'net_to_owner' => $netToOwner,
         ];
     }
 }

@@ -17,6 +17,16 @@ class BookingController extends Controller
         $this->bookingService = $bookingService;
     }
 
+    // Ini pintu yang tadi hilang, Captain!
+    public function checkout($booking_id)
+    {
+        // Kita ambil data booking beserta data gedungnya (venue)
+        $booking = Booking::with('venue')->findOrFail($booking_id);
+
+        // Kita arahkan ke file resources/views/user/checkout.blade.php
+        return view('user.checkout', compact('booking'));
+    }
+
     public function store(Request $request)
     {
         // 1. Validasi Input Dasar
@@ -28,15 +38,11 @@ class BookingController extends Controller
             'end_time' => 'required|after:start_time',
         ]);
 
-        // 2. Ambil Setting Venue (fee_mode, pg_fee_bearer, dll)
+        // 2. Ambil Setting Venue
         $venue = Venue::findOrFail($request->venue_id);
 
-        // 3. Cek Ketersediaan Lapangan (Logic ini bisa kita kembangkan nanti)
-        // Sementara kita asumsikan tersedia.
-
         // 4. Hitung Breakdown Biaya via Service
-        // Kita gunakan harga dasar dari input atau dari tabel fields
-        $basePrice = 50000; // Contoh statis, nanti ambil dari $field->price_per_hour
+        $basePrice = 50000; 
         $calculation = $this->bookingService->calculateTotal($basePrice, $venue);
 
         // 5. Simpan ke Database
@@ -48,7 +54,6 @@ class BookingController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             
-            // Data dari hasil hitungan Service
             'base_price' => $calculation['base_price'],
             'app_fee' => $calculation['app_fee'],
             'app_fee_bearer' => $calculation['app_fee_bearer'],
@@ -60,7 +65,6 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
-        // 6. Arahkan ke Halaman Pembayaran (Checkout)
         return redirect()->route('checkout.show', $booking->id);
     }
 }
