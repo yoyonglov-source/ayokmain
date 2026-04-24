@@ -8,6 +8,7 @@ use App\Http\Controllers\OperatingHourController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 
 // ==========================================
 // AREA USER (GUEST / END-USER)
@@ -62,6 +63,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.process');
 });
 
+// user homepage
+Route::get('/', [HomeController::class, 'index'])->name('user.home');
+Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
 
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)
@@ -72,4 +76,3 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
