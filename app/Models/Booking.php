@@ -32,4 +32,11 @@ class Booking extends Model
     {
         return $this->belongsTo(Venue::class);
     }
+
+    // app/Models/Booking.php
+
+    public function field()
+    {
+        return $this->belongsTo(Field::class);
+    }
 }
