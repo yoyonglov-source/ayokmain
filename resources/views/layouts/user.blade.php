@@ -27,10 +27,11 @@
         </div>
         <div class="flex gap-3 items-center">
             @auth
-                <a href="{{ url('/admin') }}" class="text-sm font-bold text-gray-600 px-4">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="text-sm font-bold text-gray-600 px-4">Dashboard</a>
             @else
-                <a href="{{ url('/login') }}" class="text-sm font-bold text-gray-600 px-4">Masuk</a>
-                <a href="{{ url('/register') }}" class="bg-brand text-white px-6 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition">Daftar</a>
+                {{-- Gunakan route() bukan url() agar lebih aman --}}
+                <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 px-4 uppercase italic">Masuk</a>
+                <a href="{{ route('register') }}" class="bg-brand text-white px-6 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition uppercase italic">Daftar</a>
             @endauth
         </div>
     </nav>

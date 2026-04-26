@@ -3,29 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Venue;
+use App\Models\OperatingHour;
+use App\Traits\ImageManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Traits\ImageManager; // 1. Import Trait
-use App\Models\OperatingHour;
 
 class VenueController extends Controller
 {
-    use ImageManager; // 2. Gunakan Trait
+    use ImageManager;
 
     public function index()
     {
+        // Pastikan relasi venues() sudah ada di model User
         $venues = Auth::user()->venues()->withCount('fields')->get(); 
-        return view('venues.index', compact('venues'));
+        return view('admin.venues.index', compact('venues'));
     }
 
     public function create()
     {
-        return view('venues.create');
+        return view('admin.venues.create');
     }
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -36,7 +37,7 @@ class VenueController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240', 
         ], [
             'image.required' => 'Wajib mengunggah foto gedung agar tampilan menarik!',
-            'image.max' => 'Ukuran foto maksimal adalah 2MB.',
+            'image.max' => 'Ukuran foto maksimal adalah 10MB.',
         ]);
 
         $data = $request->all();
@@ -44,7 +45,6 @@ class VenueController extends Controller
         $data['slug'] = Str::slug($request->name) . '-' . rand(100, 999);
         $data['city'] = ucwords(strtolower($request->city));
 
-        // Logika Upload Image
         if ($request->hasFile('image')) {
             $data['image'] = $this->uploadAndCompress(
                 $request->file('image'), 
@@ -53,18 +53,12 @@ class VenueController extends Controller
             );
         }
 
-        // --- INI PERBAIKANNYA: TAMBAHKAN $venue = ---
         $venue = Venue::create($data);
 
         // OTOMATISASI JAM OPERASIONAL
         $days = [
-            0 => 'Minggu',
-            1 => 'Senin',
-            2 => 'Selasa',
-            3 => 'Rabu',
-            4 => 'Kamis',
-            5 => 'Jumat',
-            6 => 'Sabtu'
+            0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
+            4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'
         ];
 
         foreach ($days as $index => $name) {
@@ -73,19 +67,20 @@ class VenueController extends Controller
                 'day'        => $index,
                 'open_time'  => '07:00', 
                 'close_time' => '23:00', 
-                'peak_start' => '17:00', // Default jam sibuk mulai
-                'peak_end'   => '22:00', // Default jam sibuk berakhir
+                'peak_start' => '17:00',
+                'peak_end'   => '22:00',
                 'is_closed'  => false,
             ]);
         }
 
-        return redirect()->route('venues.index')->with('success', 'Gedung dan Jam Operasional default berhasil dibuat!');
+        return redirect()->route('venues.index')->with('success', 'Gedung berhasil dibuat!');
     }
+
     public function edit(Venue $venue)
     {
         if ($venue->user_id !== Auth::id()) { abort(403); }
         $venue->load('operatingHours');
-        return view('venues.edit', compact('venue'));
+        return view('admin.venues.edit', compact('venue'));
     }
 
     public function update(Request $request, Venue $venue)
@@ -108,8 +103,6 @@ class VenueController extends Controller
             if ($venue->image) {
                 Storage::disk('public')->delete($venue->image);
             }
-
-            // Logika Upload Image Baru (Disesuaikan menggunakan Trait)
             $data['image'] = $this->uploadAndCompress(
                 $request->file('image'), 
                 'venues', 
@@ -118,7 +111,6 @@ class VenueController extends Controller
         }
 
         $venue->update($data);
-
         return redirect()->route('venues.index')->with('success', 'Data gedung berhasil diperbarui!');
     }
 
@@ -131,7 +123,6 @@ class VenueController extends Controller
         }
 
         $venue->delete();
-
         return redirect()->route('venues.index')->with('success', 'Gedung telah dihapus.');
     }
 }

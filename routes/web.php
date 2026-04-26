@@ -7,21 +7,16 @@ use App\Http\Controllers\Admin\FieldBreakController;
 use App\Http\Controllers\OperatingHourController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SettingController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // AREA USER (GUEST / END-USER)
 // ==========================================
-Route::get('/', function () {
-    // Sementara kita buat teks polos dulu untuk membuktikan ini halaman USER
-    return "<h1>Halaman Depan AyokMain (User Side)</h1><p>Segera Hadir: Pilih Kota & GOR</p>";
-    
-    // Nanti kalau sudah ada view-nya, kita ganti jadi:
-    // return view('user.home'); 
-})->name('user.home');
+Route::get('/', [HomeController::class, 'index'])->name('user.home');
+Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
 
-// Simulasi Checkout tetap bisa diakses (untuk sementara)
+// Checkout tetap bisa diakses (untuk sementara)
 Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->name('checkout.show');
 
 
@@ -30,7 +25,6 @@ Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->na
 // ==========================================
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     
-    // Redirect localhost:8000/admin langsung ke dashboard
     Route::get('/', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -59,13 +53,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         Route::delete('/fields/{field}', [FieldController::class, 'destroy'])->name('fields.destroy');
     });
 
-    // --- LOGIC BOOKING DARI SISI ADMIN (Jika diperlukan) ---
+    // --- LOGIC BOOKING DARI SISI ADMIN ---
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.process');
 });
-
-// user homepage
-Route::get('/', [HomeController::class, 'index'])->name('user.home');
-Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
 
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)
@@ -76,3 +66,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// WAJIB ADA: Memanggil rute login, register, logout dari file auth.php
+require __DIR__.'/auth.php';
