@@ -10,17 +10,6 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-// ==========================================
-// AREA USER (GUEST / END-USER)
-// ==========================================
-Route::get('/', [HomeController::class, 'index'])->name('user.home');
-Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
-
-// Checkout tetap bisa diakses (untuk sementara)
-Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->name('checkout.show');
-
-
-// ==========================================
 // AREA ADMIN / OWNER (BUTUH LOGIN)
 // ==========================================
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
@@ -38,24 +27,46 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     });
 
     // --- MANAJEMEN GEDUNG & OPERASIONAL ---
-    Route::resource('venues', VenueController::class);
+    Route::resource('venues', VenueController::class)->names([
+        'index'   => 'admin.venues.index',
+        'create'  => 'admin.venues.create',
+        'store'   => 'admin.venues.store',
+        'show'    => 'admin.venues.show',
+        'edit'    => 'admin.venues.edit',
+        'update'  => 'admin.venues.update',
+        'destroy' => 'admin.venues.destroy',
+    ]);
+
     Route::post('/field-breaks', [FieldBreakController::class, 'store'])->name('admin.field-breaks.store');
     Route::delete('/field-breaks/{id}', [FieldBreakController::class, 'destroy'])->name('admin.field-breaks.destroy');
     Route::put('/operating-hours/{operatingHour}', [OperatingHourController::class, 'update'])->name('operating-hours.update');
 
     // --- MANAJEMEN LAPANGAN (Nested) ---
-    Route::prefix('venues/{venue}')->group(function () {
-        Route::get('/fields', [FieldController::class, 'index'])->name('venues.fields.index');
-        Route::get('/fields/create', [FieldController::class, 'create'])->name('fields.create');
-        Route::post('/fields', [FieldController::class, 'store'])->name('fields.store');
-        Route::get('/fields/{field}/edit', [FieldController::class, 'edit'])->name('fields.edit');
-        Route::put('/fields/{field}', [FieldController::class, 'update'])->name('fields.update');
-        Route::delete('/fields/{field}', [FieldController::class, 'destroy'])->name('fields.destroy');
+    // Gunakan nama rute yang konsisten 'admin.venues.fields.xxx'
+    Route::group(['prefix' => 'venues/{venue}/fields', 'as' => 'admin.venues.fields.'], function () {
+        Route::get('/', [FieldController::class, 'index'])->name('index');
+        Route::get('/create', [FieldController::class, 'create'])->name('create');
+        Route::post('/', [FieldController::class, 'store'])->name('store');
+        Route::get('/{field}/edit', [FieldController::class, 'edit'])->name('edit');
+        Route::put('/{field}', [FieldController::class, 'update'])->name('update');
+        Route::delete('/{field}', [FieldController::class, 'destroy'])->name('destroy');
     });
 
     // --- LOGIC BOOKING DARI SISI ADMIN ---
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.process');
+    Route::get('/tes-admin', function() {
+        return "Rute Admin Terdeteksi!";
+    });
 });
+
+
+// AREA USER (GUEST / END-USER)
+// ==========================================
+Route::get('/', [HomeController::class, 'index'])->name('user.home');
+Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
+
+// Checkout tetap bisa diakses (untuk sementara)
+Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->name('checkout.show');
 
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)

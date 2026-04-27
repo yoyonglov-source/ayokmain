@@ -5,7 +5,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         
-        <a href="{{ route('venues.create') }}" class="group flex flex-col items-center justify-center p-8 bg-white border-2 border-dashed border-gray-200 rounded-3xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all duration-300 min-h-[350px]">
+        <a href="{{ route('admin.venues.create') }}" class="group flex flex-col items-center justify-center p-8 bg-white border-2 border-dashed border-gray-200 rounded-3xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all duration-300 min-h-[350px]">
             <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <i class="fa-solid fa-plus text-2xl text-emerald-600"></i>
             </div>
@@ -20,7 +20,7 @@
         @foreach($venues as $venue)
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-md relative">
             
-            <a href="{{ route('venues.edit', $venue->id) }}" 
+            <a href="{{ route('admin.venues.edit', $venue->id) }}" 
                 class="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm p-2.5 rounded-xl shadow-md text-amber-500 
                     opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 active:scale-90">
                 <i class="fa-solid fa-pen-to-square text-xs"></i>
@@ -57,7 +57,7 @@
                         <i class="fa-solid fa-layer-group mr-1"></i> {{ $venue->fields_count }} Lapangan
                     </span>
                     {{-- Link Kelola Detail Tetap Ada sebagai Tombol Utama --}}
-                    <a href="{{ route('venues.fields.index', $venue->id) }}" class="text-emerald-700 font-bold text-sm hover:text-emerald-800 flex items-center">
+                    <a href="{{ route('admin.venues.fields.index', $venue->id) }}" class="text-emerald-700 font-bold text-sm hover:text-emerald-800 flex items-center">
                         Kelola Detail <i class="fa-solid fa-chevron-right ml-2 text-[10px]"></i>
                     </a>
                 </div>

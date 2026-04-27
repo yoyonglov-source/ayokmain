@@ -73,7 +73,7 @@ class VenueController extends Controller
             ]);
         }
 
-        return redirect()->route('venues.index')->with('success', 'Gedung berhasil dibuat!');
+        return redirect()->route('admin.venues.index')->with('success', 'Gedung berhasil dibuat!');
     }
 
     public function edit(Venue $venue)
@@ -111,7 +111,7 @@ class VenueController extends Controller
         }
 
         $venue->update($data);
-        return redirect()->route('venues.index')->with('success', 'Data gedung berhasil diperbarui!');
+        return redirect()->route('admin.venues.index')->with('success', 'Data gedung berhasil diperbarui!');
     }
 
     public function destroy(Venue $venue)
@@ -123,6 +123,6 @@ class VenueController extends Controller
         }
 
         $venue->delete();
-        return redirect()->route('venues.index')->with('success', 'Gedung telah dihapus.');
+        return redirect()->route('admin.venues.index')->with('success', 'Gedung telah dihapus.');
     }
 }

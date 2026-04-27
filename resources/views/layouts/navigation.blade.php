@@ -16,9 +16,10 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     
-                    <x-nav-link :href="route('venues.index')" :active="request()->routeIs('venues.*')">
+                    <x-nav-link :href="route('admin.venues.index')" :active="request()->routeIs('admin.venues.*')">
                         {{ __('Gedung Saya') }}
                     </x-nav-link>
+                                
                 </div>
             </div>
 
