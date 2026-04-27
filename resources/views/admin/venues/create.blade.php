@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
-    <a href="{{ route('venues.index') }}" class="flex items-center text-emerald-700 font-semibold mb-6 hover:text-emerald-800 transition">
+    <a href="{{ route('admin.venues.index') }}" class="flex items-center text-emerald-700 font-semibold mb-6 hover:text-emerald-800 transition">
         <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Daftar Gedung
     </a>
 
@@ -11,7 +11,7 @@
             <p class="text-sm text-gray-400 mt-1">Lengkapi data gedung Anda untuk mulai mengelola lapangan.</p>
         </div>
 
-        <form action="{{ route('venues.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
+        <form action="{{ route('admin.venues.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
             @csrf
             <div class="mb-10" x-data="{ imagePreview: null }">
                 <label class="text-sm font-bold text-gray-700 block mb-3">Foto Utama Gedung</label>

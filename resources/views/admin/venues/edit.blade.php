@@ -20,7 +20,7 @@
     
     <div class="mb-8 flex items-center justify-between">
         <div>
-            <a href="{{ route('venues.index') }}" class="inline-flex items-center text-emerald-700 hover:text-emerald-800 font-bold transition-colors mb-2">
+            <a href="{{ route('admin.venues.index') }}" class="inline-flex items-center text-emerald-700 hover:text-emerald-800 font-bold transition-colors mb-2">
                 <i class="fa-solid fa-arrow-left mr-2"></i>
                 Kembali ke Daftar Gedung
             </a>

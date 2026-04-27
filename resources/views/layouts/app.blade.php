@@ -44,7 +44,8 @@
                 <span>Dashboard</span>
             </a>
 
-            <a href="/venues" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-emerald-600/40 border border-emerald-500/30 shadow-sm">
+            <a href="{{ route('admin.venues.index') }}" 
+                class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-emerald-600/40 border border-emerald-500/30 shadow-sm">
                 <i class="fa-solid fa-building opacity-100 w-5"></i>
                 <span class="font-medium">Gedung Saya</span>
             </a>
