@@ -5,7 +5,7 @@
     
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-            <a href="{{ route('venues.fields.index', $venue->id) }}" class="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:shadow-sm transition-all">
+            <a href="{{ route('admin.venues.fields.index', $venue->id) }}" class="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:shadow-sm transition-all">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <form action="{{ route('fields.update', [$venue->id, $field->id]) }}" method="POST" enctype="multipart/form-data" class="p-6 md:p-8">
+        <form action="{{ route('admin.venues.fields.update', [$venue->id, $field->id]) }}" method="POST" enctype="multipart/form-data" class="p-6 md:p-8">
             @csrf
             @method('PUT') <div class="flex flex-col md:flex-row gap-10">
                 

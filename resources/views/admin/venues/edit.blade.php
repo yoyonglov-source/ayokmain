@@ -30,7 +30,7 @@
     </div>
 
     <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-        <form action="{{ route('venues.update', $venue->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.venues.update', $venue->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 

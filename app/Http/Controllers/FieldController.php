@@ -21,7 +21,7 @@ class FieldController extends Controller
             ->where('user_id', Auth::id())
             ->findOrFail($venueId);
 
-        return view('fields.index', compact('venue'));
+        return view('admin.fields.index', compact('venue'));
     }
 
     /**
@@ -30,7 +30,7 @@ class FieldController extends Controller
     public function create($venueId)
     {
         $venue = Venue::where('user_id', Auth::id())->findOrFail($venueId);
-        return view('fields.create', compact('venue'));
+        return view('admin.fields.create', compact('venue'));
     }
 
     /**
@@ -69,7 +69,7 @@ class FieldController extends Controller
         // 5. Simpan ke Database
         Field::create($data);
 
-        return redirect()->route('venues.fields.index', $venue->id)
+        return redirect()->route('admin.venues.fields.index', $venue->id)
                          ->with('success', "Lapangan $request->name berhasil ditambahkan!");
     }
 
@@ -77,7 +77,7 @@ class FieldController extends Controller
     {
         // Kita kirimkan $venue dan $field agar Blade bisa menampilkan nama GOR 
         // dan mengisi value di form edit.
-        return view('fields.edit', compact('venue', 'field'));
+        return view('admin.fields.edit', compact('venue', 'field'));
     }
 
     /**
@@ -108,7 +108,7 @@ class FieldController extends Controller
         $field->update($data);
 
         // Gunakan $venue->id untuk redirect balik ke halaman yang benar
-        return redirect()->route('venues.fields.index', $venue->id)
+        return redirect()->route('admin.venues.fields.index', $venue->id)
                         ->with('success', 'Data lapangan berhasil diperbarui!');
     }
 }

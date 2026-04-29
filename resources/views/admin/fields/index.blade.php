@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
             <nav class="flex text-sm text-gray-500 mb-2">
-                <a href="{{ route('venues.index') }}" class="hover:text-emerald-600 transition-colors">Gedung Saya</a>
+                <a href="{{ route('admin.venues.index') }}" class="hover:text-emerald-600 transition-colors">Gedung Saya</a>
                 <span class="mx-2">/</span>
                 <span class="text-gray-800 font-medium">{{ $venue->name }}</span>
             </nav>
@@ -45,7 +45,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <a href="{{ route('fields.create', $venue->id) }}" class="group relative flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl p-8 transition-all hover:border-emerald-500 hover:bg-emerald-50/30 min-h-[300px]">
+        <a href="{{ route('admin.venues.fields.create', $venue->id) }}" class="group relative flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl p-8 transition-all hover:border-emerald-500 hover:bg-emerald-50/30 min-h-[300px]">
             <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 mb-4 group-hover:scale-110 transition-transform">
                 <i class="fa-solid fa-plus text-emerald-600 text-xl"></i>
             </div>
@@ -81,7 +81,7 @@
                                 <button type="button" onclick="openFieldModal('breakModal{{ $field->id }}')" class="text-gray-300 hover:text-red-500 transition-colors">
                                     <i class="fa-solid fa-calendar-minus text-sm"></i>
                                 </button>
-                                <a href="{{ route('fields.edit', [$venue->id, $field->id]) }}" class="text-gray-300 hover:text-amber-500 transition-colors">
+                                <a href="{{ route('admin.venues.fields.edit', [$venue->id, $field->id]) }}" class="text-gray-300 hover:text-amber-500 transition-colors">
                                     <i class="fa-solid fa-pen-to-square text-sm"></i>
                                 </a>
                             </div>

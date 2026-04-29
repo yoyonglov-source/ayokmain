@@ -86,7 +86,7 @@
             <p class="text-emerald-300 text-xs">{{ $venue->address }}, {{ $venue->city }}</p>
         </div>
         <div class="relative z-10 hidden md:block">
-            <a href="{{ route('venues.index') }}" class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-semibold transition">
+            <a href="{{ route('admin.venues.index') }}" class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-semibold transition">
                 Kembali ke Daftar Gedung
             </a>
         </div>

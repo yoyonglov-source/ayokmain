@@ -45,31 +45,42 @@
     <main class="max-w-6xl mx-auto py-16 px-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
             @foreach($venues as $venue)
-            <a href="{{ route('venue.detail', $venue->id) }}" class="group block">
-                <div class="relative overflow-hidden rounded-3xl mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500 border border-gray-100">
-                    <img src="{{ $venue->image ? asset('storage/' . $venue->image) : asset('assets/images/default-venue.jpg') }}" 
-                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-700" 
-                         alt="{{ $venue->name }}">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden group">
+                <div class="relative h-52 overflow-hidden">
+                    <img src="{{ $venue->image ? asset('storage/' . $venue->image) : 'https://via.placeholder.com/400x300?text=No+Image' }}" 
+                        alt="{{ $venue->name }}" 
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                     
-                    <div class="absolute top-4 left-4 bg-brand/90 backdrop-blur text-white text-[10px] font-bold px-4 py-1 rounded-full shadow-lg uppercase tracking-wider">
-                        {{ $venue->category ?? 'Multisport' }}
+                    <div class="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        {{ $venue->category ?? 'Multi-Sport' }}
                     </div>
                 </div>
-                
-                <div class="px-2">
-                    <h3 class="text-xl font-black text-gray-800 group-hover:text-brand transition-colors mb-1 uppercase italic">{{ $venue->name }}</h3>
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="flex items-center gap-1 text-yellow-500 text-xs font-black">
-                            <i class="fa fa-star"></i> 4.9
-                        </span>
-                        <span class="text-gray-400 text-xs font-medium italic">· {{ $venue->city ?? 'Yogyakarta' }}</span>
-                    </div>
+
+                <div class="p-5">
+                    <h3 class="text-lg font-bold text-gray-700 leading-tight mb-1 uppercase">
+                        {{ $venue->name }}
+                    </h3>
                     
-                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">
-                        Mulai Dari <span class="text-brand text-lg ml-1 font-black leading-none">Rp {{ number_format($venue->min_price ?? 35000, 0, ',', '.') }}</span>
-                    </p>
+                    <div class="flex items-center text-gray-500 text-sm mb-4">
+                        <i class="fa-solid fa-location-dot mr-1.5 text-emerald-500"></i>
+                        <span class="truncate">{{ $venue->city }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-50">
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Mulai Dari</p>
+                            <p class="text-emerald-600 font-extrabold text-lg">
+                                Rp {{ number_format($venue->fields->min('price_regular') ?? 0, 0, ',', '.') }}
+                            </p>
+                        </div>
+                        
+                        <a href="{{ route('venue.detail', $venue->id) }}" 
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl transition-all shadow-md shadow-emerald-100">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
-            </a>
+            </div>
             @endforeach
         </div>
     </main>
