@@ -13,6 +13,28 @@
     $isCustomCity = !in_array($venue->city, $mainCities);
 @endphp
 
+<!-- Quill CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    #editor {
+        height: 250px;
+        background: white;
+        border-bottom-left-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+    }
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+        border-color: #e5e7eb;
+        background: #f9fafb;
+    }
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+        border-color: #e5e7eb;
+    }
+</style>
+
 <div class="max-w-5xl mx-auto px-4 py-8" x-data="{ 
     imagePreview: '{{ asset('storage/' . $venue->image) }}',
     isOther: {{ $isCustomCity ? 'true' : 'false' }} 
@@ -78,6 +100,8 @@
                             <select name="category" class="w-full px-5 py-4 rounded-2xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 shadow-sm transition-all appearance-none bg-white text-gray-700 font-medium">
                                 <option value="Badminton" {{ old('category', $venue->category) == 'Badminton' ? 'selected' : '' }}>Badminton</option>
                                 <option value="Padel" {{ old('category', $venue->category) == 'Padel' ? 'selected' : '' }}>Padel</option>
+                                <option value="Futsal" {{ old('category') == 'Futsal' ? 'selected' : '' }}>Futsal</option>
+                                <option value="Studio Musik" {{ old('category') == 'Studio Musik' ? 'selected' : '' }}>Studio Musik</option>
                             </select>
                             <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-gray-400">
                                 <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -143,6 +167,24 @@
                               class="w-full px-5 py-4 rounded-2xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 shadow-sm transition-all text-gray-700">{{ old('address', $venue->address) }}</textarea>
                 </div>
 
+                <div class="mt-8 space-y-2">
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi Gedung</label>
+                        <p class="text-xs text-gray-500 mb-2">Jelaskan fasilitas, keunggulan, atau aturan khusus gedung Anda.</p>
+                        <!-- Input hidden untuk menampung data lama/update -->
+                        <input type="hidden" name="description" id="description" value="{{ old('description', $venue->description) }}">
+                        
+                        <!-- Wadah Editor dengan isi data dari database -->
+                        <div id="editor">
+                            {!! old('description', $venue->description) !!}
+                        </div>
+                        
+                        @error('description')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>    
+
                 <div class="flex justify-end pt-10 border-t border-gray-50 mt-10">
                     <button type="submit" class="w-full md:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-12 py-4 rounded-2xl shadow-xl shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-floppy-disk"></i>
@@ -185,4 +227,26 @@
         </div>
     </div>
 </div>
+<!-- Quill JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Update deskripsi gedung Anda...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Pastikan data masuk ke input hidden sebelum update
+    var form = document.querySelector('form');
+    form.onsubmit = function() {
+        var description = document.querySelector('input[name=description]');
+        description.value = quill.root.innerHTML;
+    };
+</script>
 @endsection

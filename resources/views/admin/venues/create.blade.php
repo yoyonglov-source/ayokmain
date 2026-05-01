@@ -1,6 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Quill CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    #editor {
+        height: 250px;
+        background: white;
+        border-bottom-left-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+    }
+    /* Menyesuaikan dengan gaya Tailwind Captain */
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+        border-color: #e5e7eb;
+        background: #f9fafb;
+    }
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+        border-color: #e5e7eb;
+    }
+</style>
 <div class="max-w-4xl mx-auto">
     <a href="{{ route('admin.venues.index') }}" class="flex items-center text-emerald-700 font-semibold mb-6 hover:text-emerald-800 transition">
         <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Daftar Gedung
@@ -8,7 +30,7 @@
 
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8 border-b border-gray-50">
-            <p class="text-sm text-gray-400 mt-1">Lengkapi data gedung Anda untuk mulai mengelola lapangan.</p>
+            <p class="text-sm text-gray-400 mt-1">Lengkapi data gedung Anda untuk mulai mengelola venue.</p>
         </div>
 
         <form action="{{ route('admin.venues.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
@@ -65,15 +87,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-2">
                     <label class="text-sm font-bold text-gray-700">Nama Gedung</label>
-                    <input type="text" name="name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="Contoh: GOR Sejahtera" required>
+                    <input type="text" name="name" value="{{ old('name') }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="Contoh: GOR Sejahtera" required>
                 </div>
 
                 <div class="space-y-2">
                     <label class="text-sm font-bold text-gray-700">Kategori Utama</label>
                     <select name="category" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none appearance-none">
-                        <option value="Badminton">Badminton</option>
-                        <option value="Padel">Padel</option>
-                        <option value="Futsal">Futsal</option>
+                        <option value="Badminton" {{ old('category') == 'Badminton' ? 'selected' : '' }}>Badminton</option>
+                        <option value="Padel" {{ old('category') == 'Padel' ? 'selected' : '' }}>Padel</option>
+                        <option value="Futsal" {{ old('category') == 'Futsal' ? 'selected' : '' }}>Futsal</option>
+                        <option value="Studio Musik" {{ old('category') == 'Studio Musik' ? 'selected' : '' }}>Studio Musik</option>
                     </select>
                 </div>
 
@@ -129,15 +152,33 @@
 
                 <div class="space-y-2">
                     <label class="text-sm font-bold text-gray-700">Nomor HP/WhatsApp</label>
-                    <input type="text" name="phone_number" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="0812..." required>
+                    <input type="text" name="phone_number" value="{{ old('phone_number') }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="0812..." required>
                 </div>
             </div>
 
             <div class="mt-8 space-y-2">
                 <label class="text-sm font-bold text-gray-700">Alamat Lengkap</label>
-                <textarea name="address" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="Tulis alamat detail di sini..." required></textarea>
+                <textarea name="address" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none" placeholder="Tulis alamat detail di sini..." required>{{ old('address') }}</textarea>
             </div>
 
+            <div class="mt-8 space-y-2">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi Gedung</label>
+                    <p class="text-xs text-gray-500 mb-2">Jelaskan fasilitas, keunggulan, atau aturan khusus gedung Anda.</p>
+                    
+                    <!-- Input hidden untuk menampung data yang akan dikirim ke Controller -->
+                    <input type="hidden" name="description" id="description" value="{{ old('description') }}">
+                    
+                    <!-- Tempat Editor Muncul -->
+                    <div id="editor">
+                        {!! old('description') !!}
+                    </div>
+                    
+                    @error('description')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>    
             <div class="mt-10 flex justify-end">
                 <button type="submit" class="bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-800 shadow-lg shadow-emerald-700/20 transition-all active:scale-95">
                     Simpan Gedung Baru
@@ -148,4 +189,27 @@
 
     <x-venue-footer-tips />
 </div>
+<!-- Quill JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Inisialisasi Quill
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Tulis deskripsi gedung di sini...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Sinkronisasi data Quill ke Input Hidden sebelum form di-submit
+    var form = document.querySelector('form');
+    form.onsubmit = function() {
+        var description = document.querySelector('input[name=description]');
+        description.value = quill.root.innerHTML;
+    };
+</script>
 @endsection

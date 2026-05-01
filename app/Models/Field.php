@@ -21,7 +21,6 @@ class Field extends Model
         'image',
         'description',
         'is_active',
-        'break_quota_minutes', 
         'last_quota_reset'
     ];
 
@@ -36,22 +35,6 @@ class Field extends Model
     public function venue()
     {
         return $this->belongsTo(Venue::class);
-    }
-
-    public function checkAndResetQuota()
-    {
-        $now = now();
-        
-        // Pastikan pembandingnya adalah sesama object Carbon
-        $lastReset = $this->last_quota_reset ? \Carbon\Carbon::parse($this->last_quota_reset) : null;
-
-        // Reset jika belum pernah reset ATAU sudah masuk minggu yang baru (Senin)
-        if (!$lastReset || $now->startOfWeek()->gt($lastReset)) {
-            $this->update([
-                'break_quota_minutes' => 120,
-                'last_quota_reset' => $now
-            ]);
-        }
     }
 
     public function bookings()

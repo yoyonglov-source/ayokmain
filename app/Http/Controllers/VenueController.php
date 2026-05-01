@@ -30,6 +30,7 @@ class VenueController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'description' => '',
             'category' => 'required',
             'address' => 'required',
             'city' => 'required',
@@ -89,6 +90,7 @@ class VenueController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'description' => '',
             'category' => 'required',
             'address' => 'required',
             'city' => 'required',
