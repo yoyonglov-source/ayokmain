@@ -3,7 +3,7 @@
 @section('content')
     <header class="bg-brand py-14 px-6 text-center text-white relative">
         <div class="relative z-10">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight uppercase">Booking Lapangan Online Terbaik</h2>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight uppercase">Booking Venue Online</h2>
             <button class="bg-yellow-400 text-brand px-6 py-2 rounded-full text-xs font-black uppercase shadow-lg hover:scale-105 transition-transform">
                 Daftarkan Venue ➜
             </button>
@@ -29,14 +29,16 @@
             <div class="w-full md:w-56 relative text-gray-500">
                 <i class="fa fa-volleyball absolute left-4 top-1/2 -translate-y-1/2"></i>
                 <select name="type" class="w-full pl-11 pr-4 py-4 rounded-xl bg-gray-50 text-sm outline-none appearance-none border-none font-semibold">
-                    <option value="">Pilih Cabor</option>
+                    <option value="">Pilih Kategori</option>
                     <option value="Padel">Padel</option>
                     <option value="Badminton">Badminton</option>
                     <option value="Futsal">Futsal</option>
+                    <option value="Futsal">Studio Musik</option>
+                    <option value="Futsal">Gedung Pernikahan</option>
                 </select>
             </div>
 
-            <button type="submit" class="bg-brand text-white px-10 py-4 rounded-xl font-bold text-sm w-full md:w-auto hover:bg-opacity-95 transition">
+            <button type="submit" class="btn-primary-gradient w-full md:w-auto px-8 py-3">
                 Cari Venue
             </button>
         </form>
