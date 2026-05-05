@@ -1,83 +1,159 @@
 @extends('layouts.user')
 
 @section('content')
-<main class="max-w-6xl mx-auto py-10 px-6" x-data="bookingSystem()">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        
-        <div class="lg:col-span-2 space-y-8">
-            <div class="bg-white rounded-3xl overflow-hidden border shadow-sm">
-                <img src="{{ asset('storage/' . $venue->image) }}" class="w-full h-72 object-cover">
-                <div class="p-6">
-                    <h1 class="text-3xl font-black text-gray-800 italic uppercase">{{ $venue->name }}</h1>
-                    <p class="text-gray-500 text-sm mt-2"><i class="fa fa-map-marker-alt text-brand"></i> {{ $venue->address }}</p>
-                </div>
-            </div>
+<!-- BREADCRUMBS -->
+<div class="bg-[#0d8173] py-3 shadow-sm border-t border-white/10">
+    <div class="max-w-6xl mx-auto px-6">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3 text-[12px] font-medium uppercase tracking-wider">
+                <li class="inline-flex items-center">
+                    <a href="{{ url('/') }}" class="text-white/80 hover:text-white transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-house text-[10px]"></i> Home
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center text-white/50">
+                        <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i>
+                        <span class="text-white/80">Sewa Venue</span>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center text-white/50">
+                        <i class="fa-solid fa-chevron-right text-[8px] mx-2"></i>
+                        <span class="text-white font-bold tracking-widest">{{ $venue->name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-            <div>
-                <h3 class="text-xl font-black text-gray-800 uppercase italic mb-6 flex items-center gap-3">
-                    <span class="w-8 h-8 bg-brand text-white rounded-lg flex items-center justify-center italic text-xs">01</span>
-                    Pilih Lapangan
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($venue->fields as $field)
-                    <label class="relative border-2 rounded-2xl p-4 cursor-pointer transition-all bg-white shadow-sm"
-                           :class="selectedField == {{ $field->id }} ? 'border-brand ring-2 ring-brand/10' : 'border-gray-100'">
-                        
-                        <input type="radio" name="field_id" value="{{ $field->id }}" class="hidden"
-                               @click="selectField({{ json_encode($field) }})">
-                        
-                        <div class="flex gap-4 items-center">
-                            <img src="{{ asset('storage/' . $field->image) }}" class="w-20 h-20 rounded-xl object-cover">
-                            <div class="flex-1">
-                                <p class="font-black text-gray-800 uppercase italic">{{ $field->name }}</p>
-                                <p class="text-brand font-black text-sm">Rp {{ number_format($field->price, 0, ',', '.') }} <span class="text-gray-400 font-normal text-[10px]">/ SESI</span></p>
-                            </div>
-                            <i class="fa fa-check-circle text-2xl transition" :class="selectedField == {{ $field->id }} ? 'text-brand' : 'text-gray-100'"></i>
-                        </div>
-                    </label>
-                    @endforeach
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto py-10 px-6" x-data="bookingSystem()">
+    
+    <!-- GRID ATAS: FOTO & DESKRIPSI -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                <div class="relative group">
+                    <img src="{{ asset('storage/' . $venue->image) }}" class="w-full h-80 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 text-white text-left">
+                        <h1 class="text-4xl font-black italic uppercase tracking-tighter">{{ $venue->name }}</h1>
+                        <p class="text-white/90 text-sm mt-1 flex items-center gap-2">
+                            <i class="fa fa-map-marker-alt text-[#0d8173] bg-white p-1.5 rounded-md text-[10px]"></i> 
+                            {{ $venue->address }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 sticky top-28">
-                <h3 class="text-lg font-black text-gray-800 mb-6 uppercase italic text-center border-b pb-4">Jadwal Main</h3>
-                
-                <div class="mb-6">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Pilih Tanggal</label>
-                    <input type="date" class="w-full p-4 bg-gray-50 rounded-xl font-bold text-sm outline-none border-none ring-1 ring-gray-100" value="{{ date('Y-m-d') }}">
+        <aside>
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-[320px] flex flex-col">
+                <h3 class="text-xs font-black text-gray-400 mb-4 uppercase tracking-widest border-b pb-2">Deskripsi Venue</h3>
+                <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                    <article class="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none text-left">
+                        {!! $venue->description ?? '<p class="italic text-gray-400">Belum ada deskripsi.</p>' !!}
+                    </article>
                 </div>
+            </div>
+        </aside>
+    </div>
 
-                <div class="mb-8">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Slot Tersedia</label>
-                    
-                    <div class="grid grid-cols-3 gap-2" id="slot-container">
-                        <template x-for="time in availableSlots" :key="time">
-                            <button @click="toggleTime(time)"
-                                    :disabled="isBooked(time)"
-                                    class="py-3 text-[11px] font-black border-2 rounded-xl transition uppercase italic"
-                                    :class="isBooked(time) ? 'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed' : 
-                                            (selectedTime.includes(time) ? 'bg-brand text-white border-brand' : 'border-gray-50 text-gray-400 hover:border-brand hover:text-brand')">
-                                <span x-text="time"></span>
-                            </button>
-                        </template>
-                        
-                        <div x-show="!selectedField" class="col-span-3 py-10 text-center text-gray-400 text-xs italic">
-                            Silakan pilih lapangan dulu...
+    <!-- GRID BAWAH: ACCORDION LAPANGAN & JADWAL -->
+    <div class="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- LEFT: Accordion Lapangan -->
+        <div class="lg:col-span-7 space-y-4">
+            <h3 class="text-xl font-black text-gray-800 uppercase italic mb-6 flex items-center gap-3">
+                <span class="w-8 h-8 bg-[#0d8173] text-white rounded-lg flex items-center justify-center italic text-xs shadow-lg">01</span>
+                Pilih Lapangan
+            </h3>
+
+            @foreach($venue->fields as $field)
+            <div class="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm transition-all"
+                 :class="selectedFieldId == {{ $field->id }} ? 'ring-2 ring-[#0d8173] border-transparent' : ''">
+                
+                <button @click="selectField({{ $field->id }}, '{{ $field->name }}')" 
+                        class="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-all text-left">
+                    <div class="flex items-center gap-5">
+                        <div class="relative">
+                            <img src="{{ asset('storage/' . $field->image) }}" class="w-20 h-20 object-cover rounded-2xl shadow-md">
+                            <div x-show="selectedFieldId == {{ $field->id }}" class="absolute -top-2 -right-2 bg-[#0d8173] text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-lg">
+                                <i class="fa fa-check"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-black text-gray-800 uppercase italic tracking-tight text-lg">{{ $field->name }}</p>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Klik untuk atur jam main</p>
                         </div>
                     </div>
+                    <i class="fa-solid fa-chevron-right transition-transform duration-300 text-gray-300" 
+                       :class="selectedFieldId == {{ $field->id }} ? 'rotate-90 text-[#0d8173]' : ''"></i>
+                </button>
+
+                <div x-show="selectedFieldId == {{ $field->id }}" x-transition.opacity class="p-6 bg-gray-50/50 border-t border-gray-50">
+                    <p class="text-xs text-gray-500 leading-relaxed italic text-left">
+                        <i class="fa-solid fa-quote-left mr-2 opacity-20"></i>
+                        {{ $field->description ?? 'Gunakan lapangan ini untuk performa terbaik permainanmu.' }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <!-- RIGHT: Schedule Grid -->
+        <div class="lg:col-span-5">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-50 sticky top-28">
+                <div class="text-center mb-8">
+                    <h3 class="text-lg font-black text-gray-800 uppercase italic tracking-tighter" x-text="selectedFieldName || 'Jadwal Main'"></h3>
+                    <div class="inline-flex items-center gap-3 mt-4 bg-gray-50 p-2 rounded-xl border border-gray-100">
+                        <i class="fa-regular fa-calendar text-[#0d8173] ml-2"></i>
+                        <input type="date" x-model="selectedDate" @change="fetchSchedules()"
+                               class="bg-transparent border-none text-sm font-black focus:ring-0 cursor-pointer">
+                    </div>
                 </div>
 
-                <div class="pt-6 border-t border-dashed">
+                <!-- Grid Jadwal Sesuai Capture -->
+                <div class="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <template x-for="slot in schedules" :key="slot.id">
+                        <button @click="toggleSlot(slot)"
+                                :disabled="slot.is_booked"
+                                class="relative p-4 rounded-2xl border-2 transition-all text-left flex flex-col group"
+                                :class="slot.is_booked ? 'bg-gray-50 border-gray-50 opacity-60 cursor-not-allowed' : 
+                                        (isSelected(slot.id) ? 'border-[#0d8173] bg-[#0d8173]/5 ring-1 ring-[#0d8173]' : 'border-gray-50 hover:border-gray-200 bg-white')">
+                            
+                            <span class="text-[9px] font-black uppercase tracking-tighter"
+                                  :class="slot.is_booked ? 'text-gray-300' : 'text-gray-400'">60 Menit</span>
+                            
+                            <span class="text-sm font-black italic mt-1"
+                                  :class="slot.is_booked ? 'text-gray-300 line-through' : 'text-gray-800'"
+                                  x-text="slot.start_time + ' - ' + slot.end_time"></span>
+
+                            <span class="text-xs font-bold mt-2"
+                                  :class="slot.is_booked ? 'text-gray-300' : 'text-[#0d8173]'"
+                                  x-text="slot.is_booked ? 'Booked' : formatRupiah(slot.price)"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!selectedFieldId" class="py-12 text-center text-gray-400 italic text-sm">
+                    <i class="fa-regular fa-calendar-check text-4xl mb-3 block opacity-10"></i>
+                    Silakan pilih lapangan terlebih dahulu
+                </div>
+
+                <!-- Checkout Info -->
+                <div x-show="selectedSlots.length > 0" class="mt-8 pt-6 border-t border-dashed border-gray-200" x-transition>
                     <div class="flex justify-between items-center mb-6">
-                        <span class="text-[10px] font-black text-gray-400 uppercase">Total (<span x-text="selectedTime.length"></span> Sesi)</span>
-                        <span class="font-black text-brand text-2xl italic" x-text="formatRupiah(totalPrice)"></span>
+                        <div class="text-left">
+                            <span class="text-[10px] font-black text-gray-400 uppercase block">Total Bayar</span>
+                            <span class="text-xs text-gray-500 italic"><span x-text="selectedSlots.length"></span> Sesi terpilih</span>
+                        </div>
+                        <span class="text-2xl font-black text-[#0d8173] italic tracking-tighter" x-text="formatRupiah(totalPrice)"></span>
                     </div>
-                    <button class="w-full bg-brand text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-lg transition-all"
-                            :disabled="selectedTime.length == 0"
-                            :class="selectedTime.length == 0 ? 'opacity-50 grayscale' : 'hover:scale-[1.02]'">
+                    <button class="btn-primary-gradient w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-[#0d8173]/20">
                         Booking Sekarang
                     </button>
                 </div>
@@ -86,57 +162,80 @@
     </div>
 </main>
 
-<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #0d8173; border-radius: 10px; }
+    
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #0d8173 0%, #0a665b 100%);
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(13, 129, 115, 0.4);
+    }
+</style>
+@endsection
+
+@push('scripts')
 <script>
-    function bookingSystem() {
-        return {
-            selectedField: null,
-            fieldPrice: 0,
-            bookedSlots: [],
-            availableSlots: [],
-            selectedTime: [],
-            totalPrice: 0,
+function bookingSystem() {
+    return {
+        selectedFieldId: null,
+        selectedFieldName: '',
+        selectedDate: new Date().toISOString().split('T')[0],
+        schedules: [],
+        selectedSlots: [],
+        totalPrice: 0,
 
-            selectField(field) {
-                this.selectedField = field.id;
-                this.fieldPrice = field.price;
-                this.selectedTime = []; // Reset pilihan jam
-                this.totalPrice = 0;
-                
-                // Ambil jam dari database field (Misal start 08:00 end 22:00)
-                this.generateSlots('08:00', '22:00');
-                
-                // Masukkan data booking lapangan ini (dari database)
-                this.bookedSlots = field.bookings.map(b => b.start_time.substring(0, 5));
-            },
+        async selectField(id, name) {
+            this.selectedFieldId = id;
+            this.selectedFieldName = name;
+            this.selectedSlots = [];
+            this.totalPrice = 0;
+            await this.fetchSchedules();
+        },
 
-            generateSlots(start, end) {
-                let slots = [];
-                let current = parseInt(start.split(':')[0]);
-                let last = parseInt(end.split(':')[0]);
-                for (let i = current; i < last; i++) {
-                    slots.push((i < 10 ? '0' + i : i) + ':00');
-                }
-                this.availableSlots = slots;
-            },
-
-            isBooked(time) {
-                return this.bookedSlots.includes(time);
-            },
-
-            toggleTime(time) {
-                if (this.selectedTime.includes(time)) {
-                    this.selectedTime = this.selectedTime.filter(t => t !== time);
-                } else {
-                    this.selectedTime.push(time);
-                }
-                this.totalPrice = this.selectedTime.length * this.fieldPrice;
-            },
-
-            formatRupiah(amount) {
-                return 'Rp ' + amount.toLocaleString('id-ID');
+        async fetchSchedules() {
+            if (!this.selectedFieldId) return;
+            try {
+                // Catatan: Pastikan Route API ini sudah Captain buat di routes/api.php
+                const response = await fetch(`/api/fields/${this.selectedFieldId}/schedules?date=${this.selectedDate}`);
+                this.schedules = await response.json();
+            } catch (e) {
+                console.error("Gagal mengambil jadwal:", e);
+                // Dummy data untuk testing jika API belum siap
+                this.schedules = [
+                    { id: 1, start_time: '08:00', end_time: '09:00', price: 150000, is_booked: false },
+                    { id: 2, start_time: '09:00', end_time: '10:00', price: 150000, is_booked: true },
+                ];
             }
+        },
+
+        toggleSlot(slot) {
+            if (this.isSelected(slot.id)) {
+                this.selectedSlots = this.selectedSlots.filter(s => s.id !== slot.id);
+                this.totalPrice -= parseInt(slot.price);
+            } else {
+                this.selectedSlots.push(slot);
+                this.totalPrice += parseInt(slot.price);
+            }
+        },
+
+        isSelected(id) {
+            return this.selectedSlots.some(s => s.id === id);
+        },
+
+        formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { 
+                style: 'currency', 
+                currency: 'IDR', 
+                minimumFractionDigits: 0 
+            }).format(number);
         }
     }
+}
 </script>
-@endsection
+@endpush

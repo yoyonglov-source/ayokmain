@@ -77,7 +77,7 @@
                         </div>
                         
                         <a href="{{ route('venue.detail', $venue->id) }}" 
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl transition-all shadow-md shadow-emerald-100">
+                            class="bg-[#0d8173] hover:bg-[#065f55] text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md shadow-emerald-100">
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
