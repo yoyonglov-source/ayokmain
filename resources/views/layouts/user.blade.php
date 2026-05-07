@@ -63,5 +63,14 @@
     <footer class="bg-gray-100 py-10 text-center border-t mt-20">
         <p class="text-gray-400 text-sm italic">© 2026 AyokMain. Platform Booking Olahraga Terintegrasi.</p>
     </footer>
+    @yield('content')
+
+    <footer class="bg-gray-100 py-10 text-center border-t mt-20">
+        <p class="text-gray-400 text-sm italic">© 2026 AyokMain. Platform Booking Olahraga Terintegrasi.</p>
+    </footer>
+
+    @stack('scripts')
+</body>
+</html>
 </body>
 </html>
