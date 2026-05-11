@@ -161,7 +161,7 @@
         </div>
     </div>
 </main>
-
+@endsection
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     [x-cloak] { display: none !important; }
@@ -169,18 +169,19 @@
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #0d8173; border-radius: 10px; }
 </style>
-@endsection
 
 @push('scripts')
+{{-- Load plugin hanya jika belum ada di layout --}}
 <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    // Pastikan ini dibungkus alpine:init
     document.addEventListener('alpine:init', () => {
+        // Cek agar tidak inisialisasi dua kali jika terjadi hot-reload
+        if (window.bookingSystemInitialized) return;
+        window.bookingSystemInitialized = true;
+
         Alpine.data('bookingSystem', () => ({
             openFieldId: null,
             activeFieldName: '',
@@ -195,24 +196,26 @@
             init() {
                 this.generateDates();
                 
-                // Inisialisasi Flatpickr
-                this.fp = flatpickr("#datepicker", {
-                    dateFormat: "Y-m-d",
-                    minDate: "today",
-                    disableMobile: "true",
-                    onChange: (selectedDates, dateStr) => {
-                        this.changeDate(dateStr);
-                    }
-                });
-                
-                console.log("Mesin Booking Berhasil Start!");
+                // Gunakan timeout agar DOM benar-benar siap (Fix kalender gak bisa diklik)
+                setTimeout(() => {
+                    this.fp = flatpickr("#datepicker", {
+                        dateFormat: "Y-m-d",
+                        minDate: "today",
+                        disableMobile: true,
+                        // Fix agar kalender muncul di atas elemen lain
+                        static: true, 
+                        monthSelectorType: 'static',
+                        onChange: (selectedDates, dateStr) => {
+                            this.changeDate(dateStr);
+                        }
+                    });
+                }, 100);
             },
 
             generateDates() {
                 const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
                 this.availableDates = [];
-
                 for (let i = 0; i < 7; i++) {
                     const d = new Date();
                     d.setDate(d.getDate() + i);
@@ -251,9 +254,10 @@
                 this.schedules = [];
                 try {
                     const response = await fetch(`/api/fields/${this.openFieldId}/schedules?date=${this.selectedDate}`);
+                    if (!response.ok) throw new Error();
                     this.schedules = await response.json();
                 } catch (error) {
-                    console.error("Gagal ambil jadwal:", error);
+                    console.error("Gagal ambil jadwal");
                 }
             },
 

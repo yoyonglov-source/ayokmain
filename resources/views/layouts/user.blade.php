@@ -10,28 +10,8 @@
         .bg-brand { background-color: #0d8173; }
         .text-brand { color: #0d8173; }
         .border-brand { border-color: #1e4d40; }
+        [x-cloak] { display: none !important; }
     </style>
-    <style>
-    .btn-primary-gradient {
-        background: linear-gradient(to right, #0d4a51, #145d65);
-        color: white;
-        font-weight: 600;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-primary-gradient:hover {
-        background: linear-gradient(to right, #145d65, #0d4a51);
-    }
-    
-    .btn-primary-gradient:active {
-        transform: scale(0.95);
-    }
-</style>
 </head>
 <body class="bg-white">
 
@@ -51,7 +31,6 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="text-sm font-bold text-gray-600 px-4">Dashboard</a>
             @else
-                {{-- Gunakan route() bukan url() agar lebih aman --}}
                 <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 px-3 uppercase">Masuk</a>
                 <a href="{{ route('register') }}" class="bg-brand text-white px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition uppercase">Daftar</a>
             @endauth
@@ -63,14 +42,7 @@
     <footer class="bg-gray-100 py-10 text-center border-t mt-20">
         <p class="text-gray-400 text-sm italic">© 2026 AyokMain. Platform Booking Olahraga Terintegrasi.</p>
     </footer>
-    @yield('content')
-
-    <footer class="bg-gray-100 py-10 text-center border-t mt-20">
-        <p class="text-gray-400 text-sm italic">© 2026 AyokMain. Platform Booking Olahraga Terintegrasi.</p>
-    </footer>
 
     @stack('scripts')
-</body>
-</html>
 </body>
 </html>
