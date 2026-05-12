@@ -7,6 +7,8 @@ use App\Models\Field;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ImageManager; // 1. Import Trait-nya
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FieldController extends Controller
 {
@@ -110,5 +112,55 @@ class FieldController extends Controller
         // Gunakan $venue->id untuk redirect balik ke halaman yang benar
         return redirect()->route('admin.venues.fields.index', $venue->id)
                         ->with('success', 'Data lapangan berhasil diperbarui!');
+    }
+
+    public function getSchedules(Request $request, $fieldId)
+    {
+        $date = $request->query('date'); // format Y-m-d
+        $dayOfWeek = date('w', strtotime($date));
+        $field = Field::with('venue.operatingHours')->findOrFail($fieldId);
+
+        // 1. Ambil jam operasional sesuai hari
+        $operatingHour = $field->venue->operatingHours->where('day', $dayOfWeek)->first();
+        
+        if (!$operatingHour || $operatingHour->is_closed) {
+            return response()->json([]); // Tutup kalau admin set libur
+        }
+
+        // 2. Ambil data break & booking di tanggal tersebut
+        $breaks = DB::table('field_breaks')->where('field_id', $fieldId)->where('date', $date)->get();
+        $bookings = DB::table('bookings')->where('field_id', $fieldId)->where('booking_date', $date)->where('status', 'paid')->get();
+
+        $slots = [];
+        $start = Carbon::parse($operatingHour->open_time);
+        $end = Carbon::parse($operatingHour->close_time);
+
+        // 3. Generate jam per jam
+        while ($start < $end) {
+            $slotStart = $start->format('H:i');
+            $slotEnd = $start->copy()->addHour()->format('H:i');
+
+            // Cek apakah jam ini masuk waktu break/tutup manual oleh admin
+            $isBlocked = $breaks->contains(function($b) use ($slotStart) {
+                return $slotStart >= $b->start_time && $slotStart < $b->end_time;
+            });
+
+            // Cek apakah sudah di-book orang
+            $isBooked = $bookings->contains('start_time', $slotStart);
+
+            $slots[] = [
+                'id' => $slotStart, 
+                'start_time' => $slotStart,
+                'end_time' => $slotEnd,
+                'price' => ($slotStart >= $operatingHour->peak_start && $slotStart < $operatingHour->peak_end) 
+                            ? $field->price_peak : $field->price_regular,
+                'is_booked' => $isBooked,
+                'is_blocked' => $isBlocked
+            ];
+            
+            $start->addHour();
+        }
+
+        return response()->json($slots);
     }
 }

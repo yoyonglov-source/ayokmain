@@ -95,15 +95,15 @@
                     </div>
 
                     <div class="lg:col-span-8">
-                        <h4 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 mb-4">{{ $field->name }}</h4>
+                        <h4 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 mb-4">{{ $venue->category }}</h4>
                         <div class="space-y-2 mb-6">
                             <div class="flex items-center gap-3 text-sm font-bold text-gray-500">
                                 <i class="fa-solid fa-table-cells text-[#0d8173] w-4"></i>
-                                <span>{{ $field->category->name ?? 'Sport' }}</span>
+                                <span>{{ $venue->category ?? 'Sport' }}</span>
                             </div>
                             <div class="flex items-center gap-3 text-sm font-bold text-gray-500">
                                 <i class="fa-solid fa-layer-group text-[#0d8173] w-4"></i>
-                                <span>Lantai: {{ $field->floor_type ?? 'Premium Synthetic' }}</span>
+                                <span>Lantai: {{ $field->field_type ?? 'Premium Synthetic' }}</span>
                             </div>
                         </div>
 
@@ -116,23 +116,49 @@
                 </div>
 
                 <div x-show="openFieldId === {{ $field->id }}" 
-                     x-collapse x-cloak
-                     class="mt-8 pt-8 border-t border-dashed border-gray-100">
+                    x-collapse x-cloak
+                    class="mt-8 pt-8 border-t border-dashed border-gray-100">
+                    
+                    <!-- Grid Utama Jadwal -->
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                         <template x-for="slot in schedules" :key="slot.id">
                             <button @click="toggleSlot(slot)"
                                 :disabled="slot.is_booked || slot.is_blocked"
-                                class="relative p-4 rounded-2xl border-2 transition-all text-center flex flex-col"
+                                class="relative p-4 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-center group"
                                 :class="slot.is_booked || slot.is_blocked ? 'bg-gray-50 border-gray-50 opacity-50 cursor-not-allowed' : 
                                         (isSelected(slot.id) ? 'border-[#0d8173] bg-[#0d8173]/5 ring-1 ring-[#0d8173]' : 'border-gray-50 hover:border-gray-200 bg-white')">
-                                <span class="text-[9px] font-black uppercase text-gray-400">60 Menit</span>
-                                <span class="text-sm font-black italic mt-1 text-gray-800" x-text="slot.start_time + ' - ' + slot.end_time"></span>
-                                <span class="text-[10px] font-bold mt-2" :class="slot.is_booked ? 'text-gray-300' : 'text-[#0d8173]'">
-                                    <span x-text="slot.is_booked ? 'Booked' : formatRupiah(slot.price)"></span>
+                                
+                                <!-- Status Badge -->
+                                <span class="text-[9px] font-black uppercase mb-1" 
+                                    :class="slot.is_booked || slot.is_blocked ? 'text-gray-400' : 'text-[#0d8173]'"
+                                    x-text="slot.is_booked ? 'Booked' : (slot.is_blocked ? 'Tutup' : 'Tersedia')">
                                 </span>
+
+                                <!-- Jam -->
+                                <span class="text-sm font-black italic text-gray-800" x-text="slot.start_time + ' - ' + slot.end_time"></span>
+                                
+                                <!-- Harga -->
+                                <span class="text-[10px] font-bold mt-2" :class="slot.is_booked ? 'text-gray-300' : 'text-gray-600'">
+                                    <span x-text="formatRupiah(slot.price)"></span>
+                                </span>
+
+                                <!-- Checkmark saat dipilih -->
+                                <template x-if="isSelected(slot.id)">
+                                    <div class="absolute -top-2 -right-2 bg-[#0d8173] text-white text-[8px] w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                </template>
                             </button>
                         </template>
                     </div>
+
+                    <!-- Pesan jika jadwal kosong -->
+                    <template x-if="schedules.length === 0">
+                        <div class="text-center py-10">
+                            <i class="fa-solid fa-calendar-xmark text-gray-200 text-4xl mb-3 block"></i>
+                            <p class="text-gray-400 text-sm italic font-bold uppercase tracking-widest">Maaf, Jadwal Tidak Tersedia Untuk Tanggal Ini</p>
+                        </div>
+                    </template>
                 </div>
             </div>
             @endforeach

@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 // ==========================================
 Route::get('/', [HomeController::class, 'index'])->name('user.home');
 Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
+Route::get('/fields/{fieldId}/schedules', [FieldController::class, 'getSchedules']);
 
 // Checkout tetap bisa diakses (untuk sementara)
 Route::get('/checkout/{booking_id}', [BookingController::class, 'checkout'])->name('checkout.show');
