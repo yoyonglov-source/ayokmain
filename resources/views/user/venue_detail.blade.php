@@ -84,83 +84,96 @@
             </div>
         </div>
 
-        <div class="space-y-6">
-            @foreach($venue->fields as $field)
-            <div class="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 overflow-hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left">
-                    <div class="lg:col-span-4">
-                        <div class="aspect-video rounded-2xl overflow-hidden shadow-inner">
-                            <img src="{{ asset('storage/' . $field->image) }}" class="w-full h-full object-cover">
-                        </div>
+        <div class="space-y-6"> <!-- Container Utama -->
+            @foreach($fields as $field)
+                <div class="p-6 flex flex-col md:flex-row gap-8">
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset('storage/' . $field->image) }}" class="w-full md:w-72 h-48 object-cover rounded-3xl shadow-md">
                     </div>
-
-                    <div class="lg:col-span-8">
-                        <h4 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 mb-4">{{ $venue->category }}</h4>
-                        <div class="space-y-2 mb-6">
-                            <div class="flex items-center gap-3 text-sm font-bold text-gray-500">
-                                <i class="fa-solid fa-table-cells text-[#0d8173] w-4"></i>
-                                <span>{{ $venue->category ?? 'Sport' }}</span>
-                            </div>
-                            <div class="flex items-center gap-3 text-sm font-bold text-gray-500">
-                                <i class="fa-solid fa-layer-group text-[#0d8173] w-4"></i>
-                                <span>Lantai: {{ $field->field_type ?? 'Premium Synthetic' }}</span>
-                            </div>
-                        </div>
-
-                        <button @click="toggleJadwal({{ $field->id }})" 
-                            class="bg-[#991b1b] text-white px-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest flex items-center gap-3 hover:bg-red-900 transition-all shadow-md">
-                            <span x-text="openFieldId === {{ $field->id }} ? 'Tutup Jadwal' : '{{ $field->schedules_count ?? '10' }} Jadwal Tersedia'"></span>
-                            <i class="fa-solid" :class="openFieldId === {{ $field->id }} ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div x-show="openFieldId === {{ $field->id }}" 
-                    x-collapse x-cloak
-                    class="mt-8 pt-8 border-t border-dashed border-gray-100">
                     
-                    <!-- Grid Utama Jadwal -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        <template x-for="slot in schedules" :key="slot.id">
-                            <button @click="toggleSlot(slot)"
-                                :disabled="slot.is_booked || slot.is_blocked"
-                                class="relative p-4 rounded-2xl border-2 transition-all text-center flex flex-col items-center justify-center group"
-                                :class="slot.is_booked || slot.is_blocked ? 'bg-gray-50 border-gray-50 opacity-50 cursor-not-allowed' : 
-                                        (isSelected(slot.id) ? 'border-[#0d8173] bg-[#0d8173]/5 ring-1 ring-[#0d8173]' : 'border-gray-50 hover:border-gray-200 bg-white')">
-                                
-                                <!-- Status Badge -->
-                                <span class="text-[9px] font-black uppercase mb-1" 
-                                    :class="slot.is_booked || slot.is_blocked ? 'text-gray-400' : 'text-[#0d8173]'"
-                                    x-text="slot.is_booked ? 'Booked' : (slot.is_blocked ? 'Tutup' : 'Tersedia')">
-                                </span>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <!-- Nama Lapangan -->
+                            <h3 class="font-black italic text-3xl uppercase tracking-tighter text-gray-800">
+                                {{ $field->name }}
+                            </h3>
+                            
+                            <!-- Informasi Kategori & Lantai -->
+                            <div class="mt-3 flex flex-wrap gap-4 items-center">
+                                <!-- Kategori dari Venue (category) -->
+                                <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+                                    <i class="fa-solid fa-tag text-[#0d8173] text-[10px]"></i>
+                                    <span class="text-[11px] font-black uppercase tracking-wider text-gray-600">
+                                        {{ $venue->category }}
+                                    </span>
+                                </div>
 
-                                <!-- Jam -->
-                                <span class="text-sm font-black italic text-gray-800" x-text="slot.start_time + ' - ' + slot.end_time"></span>
-                                
-                                <!-- Harga -->
-                                <span class="text-[10px] font-bold mt-2" :class="slot.is_booked ? 'text-gray-300' : 'text-gray-600'">
-                                    <span x-text="formatRupiah(slot.price)"></span>
-                                </span>
+                                <!-- Tipe Lantai dari Field (field_type) -->
+                                <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+                                    <i class="fa-solid fa-layer-group text-[#0d8173] text-[10px]"></i>
+                                    <span class="text-[11px] font-black uppercase tracking-wider text-gray-600">
+                                        {{ $field->field_type }}
+                                    </span>
+                                </div>
+                            </div>
 
-                                <!-- Checkmark saat dipilih -->
-                                <template x-if="isSelected(slot.id)">
-                                    <div class="absolute -top-2 -right-2 bg-[#0d8173] text-white text-[8px] w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
-                                        <i class="fa-solid fa-check"></i>
-                                    </div>
-                                </template>
-                            </button>
-                        </template>
-                    </div>
-
-                    <!-- Pesan jika jadwal kosong -->
-                    <template x-if="schedules.length === 0">
-                        <div class="text-center py-10">
-                            <i class="fa-solid fa-calendar-xmark text-gray-200 text-4xl mb-3 block"></i>
-                            <p class="text-gray-400 text-sm italic font-bold uppercase tracking-widest">Maaf, Jadwal Tidak Tersedia Untuk Tanggal Ini</p>
+                            <!-- Deskripsi Singkat (Opsional) -->
+                            @if($field->description)
+                                <p class="mt-4 text-sm text-gray-500 leading-relaxed max-w-xl">
+                                    {{ Str::limit($field->description, 100) }}
+                                </p>
+                            @endif
                         </div>
-                    </template>
+
+                        <!-- Tombol Toggle Jadwal -->
+                        <div class="mt-6">
+                            <button @click="toggleJadwal({{ $field->id }}, '{{ $field->name }}')" 
+                                class="bg-[#991b1b] text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center gap-3 hover:bg-red-900 transition-all shadow-lg shadow-red-900/20">
+                                <span x-text="openFieldId === {{ $field->id }} ? 'Tutup Jadwal' : 'Lihat Jadwal'"></span>
+                                <i class="fa-solid transition-transform duration-300" :class="openFieldId === {{ $field->id }} ? 'fa-chevron-up rotate-180' : 'fa-chevron-down'"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                    <!-- Kontainer Jadwal (Harus sejajar dengan Header di dalam loop) -->
+                    <div x-show="openFieldId === {{ $field->id }}" x-collapse x-cloak>
+                        <div class="p-6 bg-gray-50 border-t border-dashed border-gray-200">
+                            <!-- Area Slot Jadwal -->
+                            <template x-if="schedules.length > 0">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> <!-- Gap diperlebar sedikit -->
+                                    <template x-for="slot in schedules" :key="slot.start_time">
+                                        <button 
+                                            @click="toggleSlot(slot)"
+                                            :disabled="slot.is_booked || slot.is_blocked"
+                                            class="p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 border-2"
+                                            :class="{
+                                                'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed': slot.is_booked || slot.is_blocked,
+                                                'bg-[#0d8173] text-white border-[#0d8173] shadow-md scale-95': isSelected(slot.id),
+                                                'bg-white border-gray-100 hover:border-[#0d8173] text-gray-700': !slot.is_booked && !slot.is_blocked && !isSelected(slot.id)
+                                            }"
+                                        >
+                                            <!-- Menampilkan Rentang Jam (Font diperbesar ke text-base/lg) -->
+                                            <span class="text-base md:text-lg font-black italic tracking-tight" 
+                                                x-text="slot.start_time + ' - ' + slot.end_time"></span>
+                                            
+                                            <!-- Harga (Font diperbesar ke text-xs/sm) -->
+                                            <span class="text-xs md:text-sm font-bold opacity-90 mt-1" 
+                                                x-text="formatRupiah(slot.price)"></span>
+                                            
+                                            <!-- Badge Status -->
+                                            <template x-if="slot.is_booked">
+                                                <span class="text-[10px] uppercase font-black mt-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Penuh</span>
+                                            </template>
+                                            <template x-if="slot.is_blocked">
+                                                <span class="text-[10px] uppercase font-black mt-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">Break</span>
+                                            </template>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                    </div>
+                </div>
             @endforeach
         </div>
     </div>
@@ -197,17 +210,12 @@
 </style>
 
 @push('scripts')
-{{-- Load plugin hanya jika belum ada di layout --}}
 <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
     document.addEventListener('alpine:init', () => {
-        // Cek agar tidak inisialisasi dua kali jika terjadi hot-reload
-        if (window.bookingSystemInitialized) return;
-        window.bookingSystemInitialized = true;
-
         Alpine.data('bookingSystem', () => ({
             openFieldId: null,
             activeFieldName: '',
@@ -216,26 +224,24 @@
             schedules: [],
             selectedSlots: [],
             totalPrice: 0,
+            isLoading: false,
             fp: null,
-            fields: @json($venue->fields->map(fn($f) => ['id' => $f->id, 'name' => $f->name])),
 
+            // Fungsi yang otomatis jalan saat x-data dimuat
             init() {
                 this.generateDates();
-                
-                // Gunakan timeout agar DOM benar-benar siap (Fix kalender gak bisa diklik)
-                setTimeout(() => {
-                    this.fp = flatpickr("#datepicker", {
-                        dateFormat: "Y-m-d",
-                        minDate: "today",
-                        disableMobile: true,
-                        // Fix agar kalender muncul di atas elemen lain
-                        static: true, 
-                        monthSelectorType: 'static',
-                        onChange: (selectedDates, dateStr) => {
-                            this.changeDate(dateStr);
-                        }
-                    });
-                }, 100);
+                this.initDatePicker();
+            },
+
+            initDatePicker() {
+                this.fp = flatpickr("#datepicker", {
+                    disableMobile: "true",
+                    dateFormat: "Y-m-d",
+                    minDate: "today",
+                    onChange: (selectedDates, dateStr) => {
+                        this.changeDate(dateStr);
+                    }
+                });
             },
 
             generateDates() {
@@ -254,42 +260,45 @@
                 }
             },
 
-            openPicker() {
-                if(this.fp) this.fp.open();
+            async fetchSchedules() {
+                if (!this.openFieldId) return;
+                
+                this.isLoading = true;
+                try {
+                    const response = await fetch(`/fields/${this.openFieldId}/schedules?date=${this.selectedDate}`);
+                    if (!response.ok) throw new Error("Gagal load data");
+                    const data = await response.json();
+                    this.schedules = data;
+                } catch (error) {
+                    console.error("Error fetching schedules:", error);
+                    this.schedules = [];
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            async toggleJadwal(fieldId, fieldName) {
+                if (this.openFieldId === fieldId) {
+                    this.openFieldId = null;
+                    return;
+                }
+                this.openFieldId = fieldId;
+                this.activeFieldName = fieldName; // Set nama lapangan agar muncul di sticky bar
+                await this.fetchSchedules();
             },
 
             async changeDate(date) {
                 this.selectedDate = date;
-                this.selectedSlots = [];
-                this.totalPrice = 0;
+                // Opsional: reset pilihan jika ganti tanggal
+                // this.selectedSlots = [];
+                // this.totalPrice = 0;
                 if (this.openFieldId) await this.fetchSchedules();
             },
 
-            async toggleJadwal(fieldId) {
-                if (this.openFieldId === fieldId) {
-                    this.openFieldId = null;
-                } else {
-                    this.openFieldId = fieldId;
-                    const field = this.fields.find(f => f.id === fieldId);
-                    this.activeFieldName = field ? field.name : '';
-                    await this.fetchSchedules();
-                }
-            },
-
-            async fetchSchedules() {
-                this.schedules = [];
-                try {
-                    const response = await fetch(`/api/fields/${this.openFieldId}/schedules?date=${this.selectedDate}`);
-                    if (!response.ok) throw new Error();
-                    this.schedules = await response.json();
-                } catch (error) {
-                    console.error("Gagal ambil jadwal");
-                }
-            },
-
             toggleSlot(slot) {
-                if (this.isSelected(slot.id)) {
-                    this.selectedSlots = this.selectedSlots.filter(s => s.id !== slot.id);
+                const index = this.selectedSlots.findIndex(s => s.id === slot.id);
+                if (index > -1) {
+                    this.selectedSlots.splice(index, 1);
                     this.totalPrice -= parseInt(slot.price);
                 } else {
                     this.selectedSlots.push(slot);
@@ -302,7 +311,15 @@
             },
 
             formatRupiah(number) {
-                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+                return new Intl.NumberFormat('id-ID', { 
+                    style: 'currency', 
+                    currency: 'IDR', 
+                    minimumFractionDigits: 0 
+                }).format(number);
+            },
+
+            openPicker() {
+                if(this.fp) this.fp.open();
             }
         }));
     });

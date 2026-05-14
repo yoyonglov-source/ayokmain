@@ -127,4 +127,18 @@ class VenueController extends Controller
         $venue->delete();
         return redirect()->route('admin.venues.index')->with('success', 'Gedung telah dihapus.');
     }
+
+    // File: app/Http/Controllers/VenueController.php
+
+    public function show($id)
+    {
+        // Ambil data venue beserta relasi fields-nya
+        $venue = Venue::with('fields')->findOrFail($id);
+
+        // Pastikan key di array ini bernama 'fields'
+        return view('user.venue_detail', [
+            'venue' => $venue,
+            'fields' => $venue->fields // Variabel inilah yang dicari oleh @foreach($fields)
+        ]);
+    }
 }

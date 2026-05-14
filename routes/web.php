@@ -63,7 +63,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 // AREA USER (GUEST / END-USER)
 // ==========================================
 Route::get('/', [HomeController::class, 'index'])->name('user.home');
-Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail');
+//Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail'); sementara ganti dulu dgn bawah ini
+Route::get('/venue/{id}', [VenueController::class, 'show'])->name('venue.detail');
 Route::get('/fields/{fieldId}/schedules', [FieldController::class, 'getSchedules']);
 
 // Checkout tetap bisa diakses (untuk sementara)
