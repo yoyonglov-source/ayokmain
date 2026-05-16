@@ -117,14 +117,20 @@ class FieldController extends Controller
     public function getSchedules(Request $request, $fieldId)
     {
         $date = $request->query('date'); // format Y-m-d
-        $dayOfWeek = date('w', strtotime($date));
+        
+        // Pastikan konversi tanggal aman dan dipaksa menjadi Integer (0-6)
+        $dayOfWeek = intval(date('w', strtotime($date)));
+        
         $field = Field::with('venue.operatingHours')->findOrFail($fieldId);
 
-        // 1. Ambil jam operasional sesuai hari
-        $operatingHour = $field->venue->operatingHours->where('day', $dayOfWeek)->first();
+        // 1. Ambil jam operasional sesuai hari (Gunakan tipe data integer yang konsisten)
+        $operatingHour = $field->venue->operatingHours->first(function($value) use ($dayOfWeek) {
+            return intval($value->day) === $dayOfWeek;
+        });
         
-        if (!$operatingHour || $operatingHour->is_closed) {
-            return response()->json([]); // Tutup kalau admin set libur
+        // JIKA HARI TERSEBUT TIDAK DISET ATAU STATUS `is_closed` ADALAH TRUE (LIBUR)
+        if (!$operatingHour || $operatingHour->is_closed == true || $operatingHour->is_closed == 1) {
+            return response()->json([]); // LANGSUNG KEMBALIKAN ARRAY KOSONG (Jadwal otomatis tidak muncul)
         }
 
         // 2. Ambil data break & booking di tanggal tersebut
@@ -148,12 +154,19 @@ class FieldController extends Controller
             // Cek apakah sudah di-book orang
             $isBooked = $bookings->contains('start_time', $slotStart);
 
+            // Tentukan harga peak atau regular
+            $price = $field->price_regular;
+            if ($operatingHour->peak_start && $operatingHour->peak_end) {
+                if ($slotStart >= $operatingHour->peak_start && $slotStart < $operatingHour->peak_end) {
+                    $price = $field->price_peak;
+                }
+            }
+
             $slots[] = [
                 'id' => $slotStart, 
                 'start_time' => $slotStart,
                 'end_time' => $slotEnd,
-                'price' => ($slotStart >= $operatingHour->peak_start && $slotStart < $operatingHour->peak_end) 
-                            ? $field->price_peak : $field->price_regular,
+                'price' => $price,
                 'is_booked' => $isBooked,
                 'is_blocked' => $isBlocked
             ];
