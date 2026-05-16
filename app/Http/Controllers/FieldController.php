@@ -148,7 +148,11 @@ class FieldController extends Controller
 
             // Cek apakah jam ini masuk waktu break/tutup manual oleh admin
             $isBlocked = $breaks->contains(function($b) use ($slotStart) {
-                return $slotStart >= $b->start_time && $slotStart < $b->end_time;
+                // Paksa format waktu dari database menjadi H:i (menghilangkan detik agar cocok dengan $slotStart)
+                $breakStart = date('H:i', strtotime($b->start_time));
+                $breakEnd = date('H:i', strtotime($b->end_time));
+                
+                return $slotStart >= $breakStart && $slotStart < $breakEnd;
             });
 
             // Cek apakah sudah di-book orang
