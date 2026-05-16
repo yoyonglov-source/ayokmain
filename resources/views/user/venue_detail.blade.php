@@ -136,32 +136,34 @@
                     </div>
                 </div>
 
-                    <!-- Kontainer Jadwal (Harus sejajar dengan Header di dalam loop) -->
-                    <div x-show="openFieldId === {{ $field->id }}" x-collapse x-cloak>
+                   <div x-show="openFieldId === {{ $field->id }}" x-collapse x-cloak>
                         <div class="p-6 bg-gray-50 border-t border-dashed border-gray-200">
-                            <!-- Area Slot Jadwal -->
-                            <template x-if="schedules.length > 0">
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> <!-- Gap diperlebar sedikit -->
-                                    <template x-for="slot in schedules" :key="slot.start_time">
+                            <template x-if="isLoading">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <template x-for="i in 8">
+                                        <div class="animate-pulse bg-gray-200/80 h-24 rounded-2xl"></div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="!isLoading && schedules.length > 0">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> <template x-for="slot in schedules" :key="slot.start_time">
                                         <button 
-                                            @click="toggleSlot(slot)"
+                                            @click="toggleSlot(slot, {{ $field->id }})"
                                             :disabled="slot.is_booked || slot.is_blocked"
                                             class="p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 border-2"
                                             :class="{
                                                 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed': slot.is_booked || slot.is_blocked,
-                                                'bg-[#0d8173] text-white border-[#0d8173] shadow-md scale-95': isSelected(slot.id),
-                                                'bg-white border-gray-100 hover:border-[#0d8173] text-gray-700': !slot.is_booked && !slot.is_blocked && !isSelected(slot.id)
+                                                'bg-[#0d8173] text-white border-[#0d8173] shadow-md scale-95': isSelected(slot.id, {{ $field->id }}),
+                                                'bg-white border-gray-100 hover:border-[#0d8173] text-gray-700': !slot.is_booked && !slot.is_blocked && !isSelected(slot.id, {{ $field->id }})
                                             }"
                                         >
-                                            <!-- Menampilkan Rentang Jam (Font diperbesar ke text-base/lg) -->
                                             <span class="text-base md:text-lg font-black italic tracking-tight" 
                                                 x-text="slot.start_time + ' - ' + slot.end_time"></span>
                                             
-                                            <!-- Harga (Font diperbesar ke text-xs/sm) -->
                                             <span class="text-xs md:text-sm font-bold opacity-90 mt-1" 
                                                 x-text="formatRupiah(slot.price)"></span>
                                             
-                                            <!-- Badge Status -->
                                             <template x-if="slot.is_booked">
                                                 <span class="text-[10px] uppercase font-black mt-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Penuh</span>
                                             </template>
@@ -172,28 +174,52 @@
                                     </template>
                                 </div>
                             </template>
+
+                            <template x-if="!isLoading && schedules.length === 0">
+                                <div class="text-center py-10 text-gray-400">
+                                    <i class="fa-solid fa-calendar-xmark text-4xl mb-2"></i>
+                                    <p class="font-bold uppercase italic text-xs">Jadwal Tidak Tersedia</p>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             @endforeach
         </div>
     </div>
 
-    <div x-show="selectedSlots.length > 0" x-transition x-cloak
-         class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-6 z-[60] shadow-2xl">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-4 text-left">
-                <div class="bg-[#0d8173]/10 p-3 rounded-2xl"><i class="fa-solid fa-cart-shopping text-[#0d8173]"></i></div>
+    <div x-show="selectedSlots.length > 0" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-10"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-10"
+        x-cloak
+        class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-5 z-[60] shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+        
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#0d8173]/10 flex items-center justify-center text-[#0d8173] text-xl shadow-inner">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                
                 <div>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sesi Terpilih</p>
-                    <p class="font-black text-gray-800 italic"><span x-text="selectedSlots.length"></span> Jam di <span x-text="activeFieldName"></span></p>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Sesi Terpilih</p>
+                    <p class="text-sm font-black text-gray-800 flex items-center gap-1.5">
+                        <span x-text="totalSesi"></span> Jam Terpilih
+                    </p>
                 </div>
             </div>
+            
             <div class="flex items-center gap-8">
                 <div class="text-right">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Pembayaran</p>
-                    <p class="text-2xl font-black text-[#0d8173] italic" x-text="formatRupiah(totalPrice)"></p>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Total Pembayaran</p>
+                    <p class="text-2xl font-black text-[#0d8173]" x-text="formatRupiah(totalPayment)"></p>
                 </div>
-                <button class="bg-[#0d8173] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-[#0d8173]/30">
+                
+                <button :disabled="totalSesi === 0" 
+                        class="bg-[#0d8173] text-white px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wide hover:bg-[#0a665b] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#0d8173]/20">
                     Lanjut Bayar
                 </button>
             </div>
@@ -222,12 +248,10 @@
             selectedDate: new Date().toISOString().split('T')[0],
             availableDates: [],
             schedules: [],
-            selectedSlots: [],
-            totalPrice: 0,
+            selectedSlots: [], 
             isLoading: false,
             fp: null,
 
-            // Fungsi yang otomatis jalan saat x-data dimuat
             init() {
                 this.generateDates();
                 this.initDatePicker();
@@ -283,31 +307,47 @@
                     return;
                 }
                 this.openFieldId = fieldId;
-                this.activeFieldName = fieldName; // Set nama lapangan agar muncul di sticky bar
+                this.activeFieldName = fieldName; 
                 await this.fetchSchedules();
             },
 
             async changeDate(date) {
                 this.selectedDate = date;
-                // Opsional: reset pilihan jika ganti tanggal
-                // this.selectedSlots = [];
-                // this.totalPrice = 0;
+                this.selectedSlots = [];
                 if (this.openFieldId) await this.fetchSchedules();
             },
 
-            toggleSlot(slot) {
-                const index = this.selectedSlots.findIndex(s => s.id === slot.id);
+            toggleSlot(slot, fieldId) {
+                const uniqueKey = `${fieldId}-${slot.id}`;
+                const index = this.selectedSlots.findIndex(s => s.uniqueKey === uniqueKey);
+
                 if (index > -1) {
                     this.selectedSlots.splice(index, 1);
-                    this.totalPrice -= parseInt(slot.price);
                 } else {
-                    this.selectedSlots.push(slot);
-                    this.totalPrice += parseInt(slot.price);
+                    this.selectedSlots.push({
+                        uniqueKey: uniqueKey,
+                        fieldId: fieldId,
+                        id: slot.id,
+                        price: parseInt(slot.price),
+                        start_time: slot.start_time,
+                        end_time: slot.end_time
+                    });
                 }
             },
 
-            isSelected(id) {
-                return this.selectedSlots.some(s => s.id === id);
+            isSelected(id, fieldId) {
+                const uniqueKey = `${fieldId}-${id}`;
+                return this.selectedSlots.some(s => s.uniqueKey === uniqueKey);
+            },
+
+            // GETTER HITUNG TOTAL SESIsecara Real-time
+            get totalSesi() {
+                return this.selectedSlots.length;
+            },
+
+            // GETTER HITUNG TOTAL HARGA secara Real-time
+            get totalPayment() {
+                return this.selectedSlots.reduce((sum, slot) => sum + slot.price, 0);
             },
 
             formatRupiah(number) {
