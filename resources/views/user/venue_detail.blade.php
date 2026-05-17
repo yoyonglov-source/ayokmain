@@ -219,6 +219,7 @@
                 </div>
                 
                 <button :disabled="totalSesi === 0" 
+                        @click="prosesCheckout()"
                         class="bg-[#0d8173] text-white px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wide hover:bg-[#0a665b] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#0d8173]/20">
                     Lanjut Bayar
                 </button>
@@ -340,7 +341,7 @@
                 return this.selectedSlots.some(s => s.uniqueKey === uniqueKey);
             },
 
-            // GETTER HITUNG TOTAL SESIsecara Real-time
+            // GETTER HITUNG TOTAL SESI secara Real-time
             get totalSesi() {
                 return this.selectedSlots.length;
             },
@@ -360,6 +361,35 @@
 
             openPicker() {
                 if(this.fp) this.fp.open();
+            },
+
+            prosesCheckout() {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                fetch("{{ route('checkout.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+                    body: JSON.stringify({
+                        booking_date: this.selectedDate, 
+                        slots: this.selectedSlots 
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Alihkan user ke halaman invoice simulasi membawa ID booking-nya
+                        window.location.href = `/checkout/invoice/${data.booking_id}`;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error saat checkout:", error);
+                    alert("Terjadi kesalahan, coba lagi.");
+                });
             }
         }));
     });

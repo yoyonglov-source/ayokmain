@@ -117,26 +117,43 @@
                             <form action="{{ route('admin.field-breaks.store') }}" method="POST" class="space-y-5">
                                 @csrf
                                 <input type="hidden" name="field_id" value="{{ $field->id }}">
+                                
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2 ml-1">Pilih Tanggal</label>
-                                        <input type="date" name="date" class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4">
+                                        <input type="date" name="date" required class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4">
                                     </div>
+                                    
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2 ml-1">Mulai</label>
-                                            <input type="time" name="start_time" class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4" required>
+                                            <select name="start_time" required class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4 appearance-none">
+                                                <option value="" disabled selected>Pilih Jam</option>
+                                                @for ($i = 0; $i < 24; $i++)
+                                                    @php $jam = sprintf('%02d:00', $i); @endphp
+                                                    <option value="{{ $jam }}">{{ $jam }}</option>
+                                                @endfor
+                                            </select>
                                         </div>
+                                        
                                         <div>
                                             <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2 ml-1">Selesai</label>
-                                            <input type="time" name="end_time" class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4" required>
+                                            <select name="end_time" required class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4 appearance-none">
+                                                <option value="" disabled selected>Pilih Jam</option>
+                                                @for ($i = 0; $i < 24; $i++)
+                                                    @php $jam = sprintf('%02d:00', $i); @endphp
+                                                    <option value="{{ $jam }}">{{ $jam }}</option>
+                                                @endfor
+                                            </select>
                                         </div>
                                     </div>
+                                    
                                     <div>
                                         <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2 ml-1">Alasan Penutupan</label>
-                                        <input type="text" name="reason" placeholder="Contoh: Maintenance" class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4">
+                                        <input type="text" name="reason" placeholder="Contoh: Maintenance" required class="w-full rounded-2xl border-gray-100 bg-gray-50 text-sm focus:ring-red-500 focus:border-red-500 py-3.5 px-4">
                                     </div>
                                 </div>
+                                
                                 <button type="submit" class="w-full bg-red-600 text-white font-black py-4 rounded-2xl hover:bg-red-700 shadow-lg shadow-red-100">SIMPAN BLOKIR</button>
                             </form>
                             <div class="mt-10 pt-6 border-t border-gray-100">

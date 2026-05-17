@@ -10,6 +10,7 @@ use App\Traits\ImageManager; // 1. Import Trait-nya
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+
 class FieldController extends Controller
 {
     use ImageManager; // 2. Gunakan Trait di dalam class
@@ -123,40 +124,66 @@ class FieldController extends Controller
         
         $field = Field::with('venue.operatingHours')->findOrFail($fieldId);
 
-        // 1. Ambil jam operasional sesuai hari (Gunakan tipe data integer yang konsisten)
+        // 1. Ambil jam operasional sesuai hari
         $operatingHour = $field->venue->operatingHours->first(function($value) use ($dayOfWeek) {
             return intval($value->day) === $dayOfWeek;
         });
         
         // JIKA HARI TERSEBUT TIDAK DISET ATAU STATUS `is_closed` ADALAH TRUE (LIBUR)
         if (!$operatingHour || $operatingHour->is_closed == true || $operatingHour->is_closed == 1) {
-            return response()->json([]); // LANGSUNG KEMBALIKAN ARRAY KOSONG (Jadwal otomatis tidak muncul)
+            return response()->json([]); 
         }
 
-        // 2. Ambil data break & booking di tanggal tersebut
-        $breaks = DB::table('field_breaks')->where('field_id', $fieldId)->where('date', $date)->get();
-        $bookings = DB::table('bookings')->where('field_id', $fieldId)->where('booking_date', $date)->where('status', 'paid')->get();
+        // 2. Ambil data break & data booking yang SUDAH SUKSES (LUNAS)
+        $breaks = DB::table('field_breaks')
+            ->where('field_id', $fieldId)
+            ->where('date', $date)
+            ->get();
+        
+        // Ambil slot booking yang sudah sukses
+        $bookings = DB::table('booking_details')
+            ->join('bookings', 'booking_details.booking_id', '=', 'bookings.id')
+            ->where('booking_details.field_id', $fieldId)
+            ->where('bookings.booking_date', $date)
+            ->where('bookings.status', 'success')
+            ->select('booking_details.start_time')
+            ->get();
 
         $slots = [];
         $start = Carbon::parse($operatingHour->open_time);
         $end = Carbon::parse($operatingHour->close_time);
 
+        // Kita kunci waktu hari ini & waktu cutoff sekarang dalam format string murni (WIB)
+        $todayString = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $cutoffTimeString = Carbon::now('Asia/Jakarta')->addMinutes(30)->format('H:i');
+
         // 3. Generate jam per jam
         while ($start < $end) {
+
             $slotStart = $start->format('H:i');
             $slotEnd = $start->copy()->addHour()->format('H:i');
 
             // Cek apakah jam ini masuk waktu break/tutup manual oleh admin
             $isBlocked = $breaks->contains(function($b) use ($slotStart) {
-                // Paksa format waktu dari database menjadi H:i (menghilangkan detik agar cocok dengan $slotStart)
                 $breakStart = date('H:i', strtotime($b->start_time));
-                $breakEnd = date('H:i', strtotime($b->end_time));
-                
+                $breakEnd = date('H:i', strtotime($b->end_time)); 
                 return $slotStart >= $breakStart && $slotStart < $breakEnd;
             });
 
-            // Cek apakah sudah di-book orang
-            $isBooked = $bookings->contains('start_time', $slotStart);
+            // Cek apakah slot sudah dibooking
+            $isBooked = $bookings->contains(function($b) use ($slotStart) {
+                return date('H:i', strtotime($b->start_time)) === $slotStart;
+            });
+
+            // Cek apakah slot sudah lewat (Hanya berlaku jika tanggal yang dicari adalah HARI INI)
+            $isPast = false;
+            if ($date === $todayString) {
+                // Karena string formatnya sudah sama-sama "H:i" (contoh "14:00" <= "16:12"), 
+                // perbandingan string murni di bawah ini dijamin 100% akurat dan anti-crash!
+                if ($slotStart <= $cutoffTimeString) {
+                    $isPast = true;
+                }
+            }
 
             // Tentukan harga peak atau regular
             $price = $field->price_regular;
@@ -167,12 +194,13 @@ class FieldController extends Controller
             }
 
             $slots[] = [
-                'id' => $slotStart, 
+                'id' => $slotStart,
                 'start_time' => $slotStart,
                 'end_time' => $slotEnd,
                 'price' => $price,
                 'is_booked' => $isBooked,
-                'is_blocked' => $isBlocked
+                'is_blocked' => $isBlocked || $isPast, // Langsung satukan di sini agar frontend mendeteksi terkunci
+                'is_past' => $isPast,
             ];
             
             $start->addHour();
