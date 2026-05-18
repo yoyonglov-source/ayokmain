@@ -77,7 +77,8 @@ Route::post('/auth/register-user', [AuthController::class, 'storeUser'])->name('
 //FONNTE
 Route::post('/checkout/send-otp', [CheckoutController::class, 'sendOtp'])->name('checkout.send_otp');
 Route::post('/checkout/verify-otp', [CheckoutController::class, 'verifyOtp'])->name('checkout.verify_otp');
-
+//===========================================
+Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)
 // ==========================================
@@ -85,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
+    
     // Route baru untuk halaman invoice simulasi
     Route::post('/checkout/pay/{id}', [CheckoutController::class, 'pay'])->name('checkout.pay');
     Route::get('/checkout/invoice/{id}', [CheckoutController::class, 'invoice'])->name('checkout.invoice');
