@@ -10,6 +10,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AuthController;
 
 // AREA ADMIN / OWNER (BUTUH LOGIN)
 // ==========================================
@@ -67,6 +68,15 @@ Route::get('/', [HomeController::class, 'index'])->name('user.home');
 //Route::get('/venue/{id}', [HomeController::class, 'show'])->name('venue.detail'); sementara ganti dulu dgn bawah ini
 Route::get('/venue/{id}', [VenueController::class, 'show'])->name('venue.detail');
 Route::get('/fields/{fieldId}/schedules', [FieldController::class, 'getSchedules']);
+
+// Route untuk proses OTP dan Registrasi User Baru
+Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp');
+Route::post('/auth/register-user', [AuthController::class, 'storeUser'])->name('auth.register-user');
+
+
+//FONNTE
+Route::post('/checkout/send-otp', [CheckoutController::class, 'sendOtp'])->name('checkout.send_otp');
+Route::post('/checkout/verify-otp', [CheckoutController::class, 'verifyOtp'])->name('checkout.verify_otp');
 
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)

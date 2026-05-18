@@ -84,23 +84,19 @@
             </div>
         </div>
 
-        <div class="space-y-6"> <!-- Container Utama -->
-            @foreach($fields as $field)
-                <div class="p-6 flex flex-col md:flex-row gap-8">
+        <div class="space-y-6"> @foreach($fields as $field)
+                <div class="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-8 mb-6">
                     <div class="flex-shrink-0">
                         <img src="{{ asset('storage/' . $field->image) }}" class="w-full md:w-72 h-48 object-cover rounded-3xl shadow-md">
                     </div>
                     
                     <div class="flex-1 flex flex-col justify-between">
                         <div>
-                            <!-- Nama Lapangan -->
                             <h3 class="font-black italic text-3xl uppercase tracking-tighter text-gray-800">
                                 {{ $field->name }}
                             </h3>
                             
-                            <!-- Informasi Kategori & Lantai -->
                             <div class="mt-3 flex flex-wrap gap-4 items-center">
-                                <!-- Kategori dari Venue (category) -->
                                 <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
                                     <i class="fa-solid fa-tag text-[#0d8173] text-[10px]"></i>
                                     <span class="text-[11px] font-black uppercase tracking-wider text-gray-600">
@@ -108,7 +104,6 @@
                                     </span>
                                 </div>
 
-                                <!-- Tipe Lantai dari Field (field_type) -->
                                 <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
                                     <i class="fa-solid fa-layer-group text-[#0d8173] text-[10px]"></i>
                                     <span class="text-[11px] font-black uppercase tracking-wider text-gray-600">
@@ -117,7 +112,6 @@
                                 </div>
                             </div>
 
-                            <!-- Deskripsi Singkat (Opsional) -->
                             @if($field->description)
                                 <p class="mt-4 text-sm text-gray-500 leading-relaxed max-w-xl">
                                     {{ Str::limit($field->description, 100) }}
@@ -125,7 +119,6 @@
                             @endif
                         </div>
 
-                        <!-- Tombol Toggle Jadwal -->
                         <div class="mt-6">
                             <button @click="toggleJadwal({{ $field->id }}, '{{ $field->name }}')" 
                                 class="bg-[#991b1b] text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center gap-3 hover:bg-red-900 transition-all shadow-lg shadow-red-900/20">
@@ -136,52 +129,49 @@
                     </div>
                 </div>
 
-                   <div x-show="openFieldId === {{ $field->id }}" x-collapse x-cloak>
-                        <div class="p-6 bg-gray-50 border-t border-dashed border-gray-200">
-                            <template x-if="isLoading">
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <template x-for="i in 8">
-                                        <div class="animate-pulse bg-gray-200/80 h-24 rounded-2xl"></div>
-                                    </template>
-                                </div>
-                            </template>
+                <div x-show="openFieldId === {{ $field->id }}" x-collapse x-cloak>
+                    <div class="p-6 bg-gray-50 border-t border-dashed border-gray-200 mb-6 rounded-b-3xl">
+                        <template x-if="isLoading">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <template x-for="i in 8">
+                                    <div class="animate-pulse bg-gray-200/80 h-24 rounded-2xl"></div>
+                                </template>
+                            </div>
+                        </template>
 
-                            <template x-if="!isLoading && schedules.length > 0">
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> <template x-for="slot in schedules" :key="slot.start_time">
-                                        <button 
-                                            @click="toggleSlot(slot, {{ $field->id }})"
-                                            :disabled="slot.is_booked || slot.is_blocked"
-                                            class="p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 border-2"
-                                            :class="{
-                                                'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed': slot.is_booked || slot.is_blocked,
-                                                'bg-[#0d8173] text-white border-[#0d8173] shadow-md scale-95': isSelected(slot.id, {{ $field->id }}),
-                                                'bg-white border-gray-100 hover:border-[#0d8173] text-gray-700': !slot.is_booked && !slot.is_blocked && !isSelected(slot.id, {{ $field->id }})
-                                            }"
-                                        >
-                                            <span class="text-base md:text-lg font-black italic tracking-tight" 
-                                                x-text="slot.start_time + ' - ' + slot.end_time"></span>
-                                            
-                                            <span class="text-xs md:text-sm font-bold opacity-90 mt-1" 
-                                                x-text="formatRupiah(slot.price)"></span>
-                                            
-                                            <template x-if="slot.is_booked">
-                                                <span class="text-[10px] uppercase font-black mt-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Penuh</span>
-                                            </template>
-                                            <template x-if="slot.is_blocked">
-                                                <span class="text-[10px] uppercase font-black mt-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">Break</span>
-                                            </template>
-                                        </button>
-                                    </template>
-                                </div>
-                            </template>
+                        <template x-if="!isLoading && schedules.length > 0">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> 
+                                <template x-for="slot in schedules" :key="slot.start_time">
+                                    <button 
+                                        @click="toggleSlot(slot, {{ $field->id }})"
+                                        :disabled="slot.is_booked || slot.is_blocked"
+                                        class="p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 border-2 w-full"
+                                        :class="{
+                                            'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed': slot.is_booked || slot.is_blocked,
+                                            'bg-[#0d8173] text-white border-[#0d8173] shadow-md scale-95': isSelected(slot.id, {{ $field->id }}),
+                                            'bg-white border-gray-100 hover:border-[#0d8173] text-gray-700': !slot.is_booked && !slot.is_blocked && !isSelected(slot.id, {{ $field->id }})
+                                        }"
+                                    >
+                                        <span class="text-base md:text-lg font-black italic tracking-tight" x-text="slot.start_time + ' - ' + slot.end_time"></span>
+                                        <span class="text-xs md:text-sm font-bold opacity-90 mt-1" x-text="formatRupiah(slot.price)"></span>
+                                        
+                                        <template x-if="slot.is_booked">
+                                            <span class="text-[10px] uppercase font-black mt-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Penuh</span>
+                                        </template>
+                                        <template x-if="slot.is_blocked">
+                                            <span class="text-[10px] uppercase font-black mt-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">Break</span>
+                                        </template>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
 
-                            <template x-if="!isLoading && schedules.length === 0">
-                                <div class="text-center py-10 text-gray-400">
-                                    <i class="fa-solid fa-calendar-xmark text-4xl mb-2"></i>
-                                    <p class="font-bold uppercase italic text-xs">Jadwal Tidak Tersedia</p>
-                                </div>
-                            </template>
-                        </div>
+                        <template x-if="!isLoading && schedules.length === 0">
+                            <div class="text-center py-10 text-gray-400">
+                                <i class="fa-solid fa-calendar-xmark text-4xl mb-2"></i>
+                                <p class="font-bold uppercase italic text-xs">Jadwal Tidak Tersedia</p>
+                            </div>
+                        </template>
                     </div>
                 </div>
             @endforeach
@@ -196,14 +186,13 @@
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-10"
         x-cloak
-        class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-5 z-[60] shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+        class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-5 z-[40] shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-[#0d8173]/10 flex items-center justify-center text-[#0d8173] text-xl shadow-inner">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </div>
-                
                 <div>
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Sesi Terpilih</p>
                     <p class="text-sm font-black text-gray-800 flex items-center gap-1.5">
@@ -219,15 +208,76 @@
                 </div>
                 
                 <button :disabled="totalSesi === 0" 
-                        @click="prosesCheckout()"
+                        @click="bukaModalUser()"
                         class="bg-[#0d8173] text-white px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wide hover:bg-[#0a665b] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#0d8173]/20">
                     Lanjut Bayar
                 </button>
             </div>
         </div>
     </div>
+
+    <div x-show="showModalUser" class="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" x-transition x-cloak>
+        <div @click.away="if(!modalLoading) showModalUser = false" class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative overflow-hidden" x-transition>
+            
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-black text-gray-800 tracking-wide uppercase">Verifikasi Kontak</h3>
+                <button type="button" @click="showModalUser = false" :disabled="modalLoading" class="text-gray-400 hover:text-gray-600 disabled:opacity-50">✕</button>
+            </div>
+
+            <div x-show="modalError" x-text="modalError" class="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold mb-4 border border-red-100"></div>
+
+            <div x-show="modalStep === 'phone'">
+                <p class="text-sm text-gray-500 mb-4">Masukkan nomor WhatsApp aktif untuk menerima kode verifikasi pesanan.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Nomor WhatsApp</label>
+                        <input type="tel" x-model="userPhone" placeholder="Contoh: 08123456789" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-base font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <button type="button" @click="handleSendOtp()" :disabled="modalLoading" class="w-full bg-[#0d8173] hover:bg-[#0a665b] text-white font-bold py-4 rounded-2xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                        <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                        <span x-text="modalLoading ? 'Mengirim...' : 'Kirim OTP WA'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="modalStep === 'otp'">
+                <p class="text-sm text-gray-500 mb-4">Kode OTP 4-digit telah dikirim ke nomor <span class="font-bold text-gray-700" x-text="userPhone"></span> via WhatsApp.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Kode OTP</label>
+                        <input type="text" x-model="userOtp" maxlength="4" placeholder="0000" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center text-2xl font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <button type="button" @click="handleVerifyOtp()" :disabled="modalLoading" class="w-full bg-[#0d8173] hover:bg-[#0a665b] text-white font-bold py-4 rounded-2xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                        <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                        <span x-text="modalLoading ? 'Memverifikasi...' : 'Verifikasi Kode'"></span>
+                    </button>
+                    <button type="button" @click="modalStep = 'phone'" :disabled="modalLoading" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 font-medium">← Ubah Nomor HP</button>
+                </div>
+            </div>
+
+            <div x-show="modalStep === 'register'">
+                <p class="text-sm text-gray-500 mb-4">Nomor Anda belum terdaftar di AyokMain. Lengkapi biodata singkat untuk data e-invoice.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                        <input type="text" x-model="userName" placeholder="Nama Anda" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alamat Email</label>
+                        <input type="email" x-model="userEmail" placeholder="nama@email.com" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <button type="button" @click="prosesCheckout()" :disabled="modalLoading" class="w-full bg-[#0d8173] hover:bg-[#0a665b] text-white font-bold py-4 rounded-2xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                        <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                        <span x-text="modalLoading ? 'Memproses Booking...' : 'Simpan & Bayar Sekarang'"></span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </main>
 @endsection
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     [x-cloak] { display: none !important; }
@@ -252,6 +302,17 @@
             selectedSlots: [], 
             isLoading: false,
             fp: null,
+
+            // STATE BARU KHUSUS MODAL OTP & INTERCEPT
+            showModalUser: false,
+            modalStep: 'phone', // phone, otp, register
+            userPhone: '',
+            userOtp: '',
+            userName: '',
+            userEmail: '',
+            isNewUser: false,
+            modalError: '',
+            modalLoading: false,
 
             init() {
                 this.generateDates();
@@ -341,12 +402,10 @@
                 return this.selectedSlots.some(s => s.uniqueKey === uniqueKey);
             },
 
-            // GETTER HITUNG TOTAL SESI secara Real-time
             get totalSesi() {
                 return this.selectedSlots.length;
             },
 
-            // GETTER HITUNG TOTAL HARGA secara Real-time
             get totalPayment() {
                 return this.selectedSlots.reduce((sum, slot) => sum + slot.price, 0);
             },
@@ -363,7 +422,93 @@
                 if(this.fp) this.fp.open();
             },
 
+            // FUNGSI BARU 1: BUKA MODAL INTERCEPT
+            bukaModalUser() {
+                this.modalError = '';
+                this.userPhone = '';
+                this.userOtp = '';
+                this.userName = '';
+                this.userEmail = '';
+                this.modalStep = 'phone';
+                this.showModalUser = true;
+            },
+
+            // FUNGSI BARU 2: TEMBAK OTP KE BACKEND
+            async handleSendOtp() {
+                if (!this.userPhone) { this.modalError = 'Nomor WA wajib diisi!'; return; }
+                this.modalLoading = true;
+                this.modalError = '';
+
+                try {
+                    let response = await fetch('/checkout/send-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ phone: this.userPhone })
+                    });
+                    let result = await response.json();
+                    
+                    if (response.ok) {
+                        this.userPhone = result.phone; // Ambil nomor ter-normalisasi dari backend
+                        this.modalStep = 'otp';
+                    } else {
+                        this.modalError = result.message || 'Gagal mengirim OTP.';
+                    }
+                } catch (error) {
+                    this.modalError = 'Terjadi kesalahan sistem.';
+                } finally {
+                    this.modalLoading = false;
+                }
+            },
+
+            // FUNGSI BARU 3: VERIFIKASI OTP & CEK STATUS USER
+            async handleVerifyOtp() {
+                if (this.userOtp.length < 4) { this.modalError = 'OTP harus 4 digit!'; return; }
+                this.modalLoading = true;
+                this.modalError = '';
+
+                try {
+                    let response = await fetch('/checkout/verify-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ phone: this.userPhone, otp: this.userOtp })
+                    });
+                    let result = await response.json();
+
+                    if (response.ok) {
+                        this.isNewUser = result.is_new_user;
+                        if (this.isNewUser) {
+                            this.modalStep = 'register'; // Masuk ke form Nama & Email jika baru
+                        } else {
+                            this.userName = result.data.name;
+                            this.userEmail = result.data.email;
+                            this.prosesCheckout(); // Langsung checkout otomatis jika user lama
+                        }
+                    } else {
+                        this.modalError = result.message || 'Kode OTP salah.';
+                    }
+                } catch (error) {
+                    this.modalError = 'Verifikasi gagal dilakukan.';
+                } finally {
+                    this.modalLoading = false;
+                }
+            },
+
+            // FUNGSI ASLI KAMU YANG SUDAH DISINKRONKAN DENGAN BIODATA OTP
             prosesCheckout() {
+                // Tambahkan validasi jika di form register tapi data kosong
+                if (this.modalStep === 'register' && (!this.userName || !this.userEmail)) {
+                    this.modalError = 'Nama dan Email wajib diisi!';
+                    return;
+                }
+
+                this.modalLoading = true;
+                this.modalError = '';
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
                 fetch("{{ route('checkout.store') }}", {
@@ -374,21 +519,28 @@
                     },
                     body: JSON.stringify({
                         booking_date: this.selectedDate, 
-                        slots: this.selectedSlots 
+                        slots: this.selectedSlots,
+                        // Kirim data tambahan hasil verifikasi OTP
+                        user_phone: this.userPhone,
+                        user_name: this.userName,
+                        user_email: this.userEmail,
+                        is_new_user: this.isNewUser
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
-                        // Alihkan user ke halaman invoice simulasi membawa ID booking-nya
+                    if (data.status === 'success' || data.booking_id) {
                         window.location.href = `/checkout/invoice/${data.booking_id}`;
                     } else {
-                        alert(data.message);
+                        this.modalError = data.message || 'Gagal memproses pesanan.';
                     }
                 })
                 .catch(error => {
                     console.error("Error saat checkout:", error);
-                    alert("Terjadi kesalahan, coba lagi.");
+                    this.modalError = "Terjadi kesalahan sistem di database, coba lagi.";
+                })
+                .finally(() => {
+                    this.modalLoading = false;
                 });
             }
         }));
