@@ -13,6 +13,8 @@
         .border-brand { border-color: #1e4d40; }
         [x-cloak] { display: none !important; }
     </style>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-white">
 

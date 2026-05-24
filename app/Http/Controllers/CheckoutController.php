@@ -137,16 +137,34 @@ class CheckoutController extends Controller
 
     public function invoice($id)
     {
+        // 1. Ambil data booking lengkap dengan relasi user, detail, lapangan, dan venue
         $booking = Booking::with([
+            'user', // Ambil data pemesan untuk ditampilkan di invoice
             'bookingDetails.field',
             'venue'
         ])->findOrFail($id);
 
+        // 2. Validasi keamanan agar user tidak bisa mengintip invoice orang lain
         if ($booking->user_id !== auth()->id()) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 
-        return view('user.checkout.invoice', compact('booking'));
+        // --- LOGIKA HITUNG SISA WAKTU REAL-TIME ---
+        $batasWaktuMenit = 20; // Set durasi batas bayar (misal 20 menit)
+        $waktuDibuat = \Carbon\Carbon::parse($booking->created_at)->timezone('Asia/Jakarta');
+        $waktuHangus = $waktuDibuat->copy()->addMinutes($batasWaktuMenit);
+        
+        // Hitung selisih detik antara waktu sekarang dengan waktu hangus
+        $waktuSekarang = \Carbon\Carbon::now('Asia/Jakarta');
+        $sisaDetik = $waktuSekarang->diffInSeconds($waktuHangus, false);
+        $sisaDetik = ($sisaDetik < 0) ? 0 : floor($sisaDetik);
+        // Jika waktu sudah minus (lewat batas), set jadi 0
+        if ($sisaDetik < 0) {
+            $sisaDetik = 0;
+        }
+
+        // 3. Lempar data ke halaman view blade
+        return view('user.checkout.invoice', compact('booking','sisaDetik'));
     }
 
     public function pay(Request $request, $id)

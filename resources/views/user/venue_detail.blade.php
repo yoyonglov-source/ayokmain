@@ -217,7 +217,7 @@
     </div>
 
     <div x-show="showModalUser" class="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" x-transition x-cloak>
-        <div @click.away="if(!modalLoading) showModalUser = false" class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative overflow-hidden" x-transition>
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative overflow-hidden" x-transition>
             
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-black text-gray-800 tracking-wide uppercase">Verifikasi Kontak</h3>

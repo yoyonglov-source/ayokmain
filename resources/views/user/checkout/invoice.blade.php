@@ -8,6 +8,102 @@
         <p class="text-xs text-gray-400 mt-1 uppercase font-semibold tracking-wider">Order ID: #{{ $booking->id }} &bull; Status: {{ $booking->status }}</p>
     </div>
 
+    @if($booking->status === 'pending')
+    <div 
+        x-data="{ 
+            countdown: 0,
+
+            get timeDisplay() {
+
+                if (this.countdown <= 0) {
+                    return '00:00';
+                }
+
+                let menit = Math.floor(this.countdown / 60);
+                let detik = this.countdown % 60;
+
+                return `${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+            },
+
+            init() {
+
+                // ambil dari attribute data-sisa
+                this.countdown = parseInt(this.$el.dataset.sisa);
+
+                if (this.countdown <= 0) {
+                    this.handleHangus();
+                    return;
+                }
+
+                let timer = setInterval(() => {
+
+                    if (this.countdown > 0) {
+
+                        this.countdown--;
+
+                    } else {
+
+                        clearInterval(timer);
+                        this.handleHangus();
+
+                    }
+
+                }, 1000);
+            },
+
+            handleHangus() {
+                alert('Waktu pembayaran telah habis!');
+                window.location.href = '/';
+            }
+        }"
+
+        data-sisa="{{ $sisaDetik }}"
+
+        class="mb-6 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-between shadow-sm"
+    >
+
+        <!-- kiri -->
+        <div class="flex items-center space-x-3">
+
+            <div class="p-2 bg-amber-500 text-white rounded-xl animate-pulse">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-bold text-amber-800">
+                    Selesaikan Sisa Pembayaran
+                </h4>
+
+                <p class="text-xs text-amber-600">
+                    Segera bayar sebelum slot jam lapangan Anda hangus.
+                </p>
+            </div>
+        </div>
+
+        <!-- kanan -->
+        <div class="text-right">
+
+            <span
+                class="text-2xl font-black text-amber-600 font-mono"
+                x-text="timeDisplay">
+                00:00
+            </span>
+
+        </div>
+
+    </div>
+    @endif
+
     <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         <div class="p-8 bg-emerald-600 text-white">
             <div class="flex justify-between items-start">
@@ -31,9 +127,23 @@
             </div>
         </div>
 
+        <div class="p-8 pb-0">
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Detail Pemesan</h3>
+                <div class="space-y-1">
+                    <p class="text-sm font-semibold text-gray-700">
+                        <span class="text-gray-400 font-normal">Nama:</span> {{ $booking->user->name }}
+                    </p>
+                    <p class="text-sm font-semibold text-gray-700">
+                        <span class="text-gray-400 font-normal">No. WA:</span> +{{ $booking->user->phone }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <div class="p-8 space-y-6">
             <div>
-                <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider text-gray-400 mb-3">Item Lapangan</h4>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Item Lapangan</h4>
                 <div class="divide-y divide-gray-100 border border-gray-50 rounded-2xl p-4 bg-gray-50/50">
                     @foreach($booking->bookingDetails as $detail)
                     <div class="py-2.5 flex justify-between items-center text-sm first:pt-0 last:pb-0">
@@ -48,7 +158,7 @@
             </div>
 
             <div>
-                <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider text-gray-400 mb-3">Rincian Biaya</h4>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Rincian Biaya</h4>
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between text-gray-600">
                         <span>Sewa Lapangan</span>
@@ -81,7 +191,7 @@
             <hr class="border-gray-100">
 
             <div>
-                <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider text-gray-400 mb-3">Pilih Metode Simulasi</h4>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">Pilih Metode Simulasi</h4>
                 
                 <form action="{{ route('checkout.pay', $booking->id) }}" method="POST" class="space-y-3">
                     @csrf
