@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class CheckoutController extends Controller
 {
@@ -30,13 +31,32 @@ class CheckoutController extends Controller
         DB::beginTransaction();
 
         try {
+            // =======================================================
+            // GERBANG 1: VALIDASI TABRAKAN SEBELUM INVOICE DIBUAT
+            // =======================================================
+            foreach ($request->slots as $slot) {
+                // Cari tahu apakah slot jam tersebut sudah dikunci oleh user lain
+                $slotSudahTerisi = BookingDetail::where('field_id', $slot['fieldId'])
+                    ->where('start_time', $slot['start_time'])
+                    ->whereHas('booking', function ($query) use ($request) {
+                        $query->where('booking_date', $request->booking_date)
+                              ->whereIn('status', ['success', 'pending']); // pending dan success dianggap mengunci
+                    })
+                    ->exists();
+
+                if ($slotSudahTerisi) {
+                    // Beri tahu user pertama secara halus
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Waduh! Slot lapangan pada jam ' . date('H:i', strtotime($slot['start_time'])) . ' baru saja dipesan oleh orang lain beberapa detik yang lalu. Silakan pilih slot jam atau hari lain.'
+                    ], 422);
+                }
+            }
 
             // =========================
             // AUTO CREATE / FIND USER
             // =========================
             if ($request->is_new_user == true) {
-
-                // Pastikan email & nama diisi kalau user baru
                 if (!$name || !$email) {
                     throw new \Exception("Nama dan Email wajib diisi untuk pengguna baru.");
                 }
@@ -51,10 +71,9 @@ class CheckoutController extends Controller
                         'email'    => $email,
                         'phone'    => $phone,
                         'is_admin' => false,
-                        'password' => bcrypt(Str::random(16)), // Mengisi password string acak agar lolos NOT NULL database
+                        'password' => bcrypt(Str::random(16)),
                     ]);
                 }
-
             } else {
                 $user = User::where('phone', $phone)->first();
             }
@@ -63,7 +82,6 @@ class CheckoutController extends Controller
                 throw new \Exception("Data pengguna tidak ditemukan di sistem.");
             }
 
-            // Auto Login aman tanpa memicu global redirect di level controller
             Auth::login($user);
 
             // =========================
@@ -118,7 +136,6 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Kembalikan respons murni JSON tanpa instruksi redirect header dari server
             return response()->json([
                 'status'     => 'success',
                 'message'    => 'Booking berhasil dibuat!',
@@ -137,34 +154,25 @@ class CheckoutController extends Controller
 
     public function invoice($id)
     {
-        // 1. Ambil data booking lengkap dengan relasi user, detail, lapangan, dan venue
         $booking = Booking::with([
-            'user', // Ambil data pemesan untuk ditampilkan di invoice
+            'user',
             'bookingDetails.field',
             'venue'
         ])->findOrFail($id);
 
-        // 2. Validasi keamanan agar user tidak bisa mengintip invoice orang lain
         if ($booking->user_id !== auth()->id()) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 
-        // --- LOGIKA HITUNG SISA WAKTU REAL-TIME ---
-        $batasWaktuMenit = 20; // Set durasi batas bayar (misal 20 menit)
-        $waktuDibuat = \Carbon\Carbon::parse($booking->created_at)->timezone('Asia/Jakarta');
+        $batasWaktuMenit = 20;
+        $waktuDibuat = Carbon::parse($booking->created_at)->timezone('Asia/Jakarta');
         $waktuHangus = $waktuDibuat->copy()->addMinutes($batasWaktuMenit);
         
-        // Hitung selisih detik antara waktu sekarang dengan waktu hangus
-        $waktuSekarang = \Carbon\Carbon::now('Asia/Jakarta');
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
         $sisaDetik = $waktuSekarang->diffInSeconds($waktuHangus, false);
         $sisaDetik = ($sisaDetik < 0) ? 0 : floor($sisaDetik);
-        // Jika waktu sudah minus (lewat batas), set jadi 0
-        if ($sisaDetik < 0) {
-            $sisaDetik = 0;
-        }
 
-        // 3. Lempar data ke halaman view blade
-        return view('user.checkout.invoice', compact('booking','sisaDetik'));
+        return view('user.checkout.invoice', compact('booking', 'sisaDetik'));
     }
 
     public function pay(Request $request, $id)
@@ -173,19 +181,70 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string'
         ]);
 
-        $booking = Booking::findOrFail($id);
+        // 1. Mulai transaksi database
+        DB::beginTransaction();
 
-        if ($booking->status === 'pending') {
+        try {
+            // 2. Ambil data booking dengan mengunci barisnya di DB agar tidak bisa diganggu request lain saat ini
+            $booking = Booking::with('bookingDetails')->lockForUpdate()->findOrFail($id);
 
+            if ($booking->status !== 'pending') {
+                DB::rollBack();
+                return redirect()->route('checkout.invoice', $booking->id);
+            }
+
+            // 3. Validasi ulang slot lapangan dengan proteksi ketat
+            foreach ($booking->bookingDetails as $detail) {
+                $sudahDilunasiOrangLain = BookingDetail::where('field_id', $detail->field_id)
+                    ->where('start_time', $detail->start_time)
+                    ->whereHas('booking', function ($query) use ($booking) {
+                        $query->where('booking_date', $booking->booking_date)
+                            ->where('status', 'success')
+                            ->where('id', '!=', $booking->id);
+                    })
+                    ->exists();
+
+                if ($sudahDilunasiOrangLain) {
+                    // Batalkan pesanan karena keduluan
+                    $booking->update(['status' => 'cancelled']);
+                    
+                    // Commit perubahan status 'cancelled'
+                    DB::commit(); 
+
+                    return redirect()
+                        ->route('checkout.invoice', $booking->id)
+                        ->with('error', 'Waduh, Maaf! Slot lapangan ini baru saja lunas dibayar oleh pemesan lain.');
+                }
+            }
+
+            // 4. Update status utama ke success
             $booking->update([
-                'status' => 'success',
+                'status'         => 'success',
                 'payment_method' => $request->payment_method,
             ]);
-        }
 
-        return redirect()
-            ->route('checkout.invoice', $booking->id)
-            ->with('success', 'Pembayaran berhasil!');
+            // =========================================================================
+            // TIPS PENTING: Jika ada kirim WA / Logika luar, taruh DI SINI sebelum commit.
+            // Jika kirim WA gagal, sistem otomatis rollback, status success dibatalkan!
+            // =========================================================================
+            // $this->kirimWhatsAppNotifikasi($booking); 
+
+            // 5. Jika semua baris di atas sukses tanpa error, baru sahkan ke database!
+            DB::commit();
+
+            return redirect()
+                ->route('checkout.invoice', $booking->id)
+                ->with('success', 'Pembayaran berhasil!');
+
+        } catch (\Exception $e) {
+            // Jika ada error jaringan, query salah, atau sistem hang di tengah jalan, 
+            // BATALKAN SEMUA PERUBAHAN! Status database kembali suci seolah tidak terjadi apa-apa.
+            DB::rollBack();
+            
+            return redirect()
+                ->route('checkout.invoice', $id)
+                ->with('error', 'Terjadi kesalahan sistem saat memproses pembayaran: ' . $e->getMessage());
+        }
     }
 
     // ====================================
