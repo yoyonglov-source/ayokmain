@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketBookingPaid;
 
 class CheckoutController extends Controller
 {
@@ -230,6 +232,7 @@ class CheckoutController extends Controller
             // $this->kirimWhatsAppNotifikasi($booking); 
 
             // 5. Jika semua baris di atas sukses tanpa error, baru sahkan ke database!
+            Mail::to($booking->user->email)->send(new TicketBookingPaid($booking)); // kirim tiket via mail + bukti pembayaran lunas
             DB::commit();
 
             return redirect()
@@ -269,7 +272,18 @@ class CheckoutController extends Controller
     public function sendOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string'
+        'phone' => [
+            'required',
+            'string',
+            'regex:/^([0-9\s\-\+\(\)]*)$/', // Hanya boleh angka, spasi, tanda +, -, atau kurung
+            'min:9',                         // Nomor HP minimal 9 digit (misal: 081234567)
+            'max:14'                         // Nomor HP maksimal 14 digit
+        ]
+        ], [
+            'phone.required' => 'Nomor WhatsApp wajib diisi!',
+            'phone.regex'    => 'Format nomor WhatsApp tidak valid. Tolong masukkan angka saja!',
+            'phone.min'      => 'Nomor WhatsApp terlalu pendek!',
+            'phone.max'      => 'Nomor WhatsApp terlalu panjang!',
         ]);
 
         // Normalisasi nomor

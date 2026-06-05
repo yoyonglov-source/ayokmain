@@ -77,6 +77,7 @@ Route::post('/auth/register-user', [AuthController::class, 'storeUser'])->name('
 //FONNTE
 Route::post('/checkout/send-otp', [CheckoutController::class, 'sendOtp'])->name('checkout.send_otp');
 Route::post('/checkout/verify-otp', [CheckoutController::class, 'verifyOtp'])->name('checkout.verify_otp');
+Route::post('/checkout/send-otp-email', [App\Http\Controllers\AuthController::class, 'sendOtpEmail'])->name('checkout.otp.email');
 //===========================================
 Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
 // ==========================================

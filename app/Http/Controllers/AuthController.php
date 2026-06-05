@@ -6,9 +6,52 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
+    public function sendOtpEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        // Ambil data OTP yang gantung di session (hasil generate dari WA sebelumnya)
+        $sessionOtp   = session('otp_code');
+        $sessionPhone = session('otp_phone');
+        $expiresAt    = session('otp_expires_at');
+
+        // Jika seandainya session kosong atau sudah expired, kita buatkan yang baru sekalian
+        if (!$sessionOtp || !$expiresAt || now()->greaterThan($expiresAt)) {
+            $sessionOtp = rand(1000, 9999);
+            $expiresAt  = now()->addMinutes(5);
+            
+            session([
+                'otp_code' => $sessionOtp,
+                'otp_expires_at' => $expiresAt
+            ]);
+        }
+
+        try {
+            // Kirim email berupa teks raw/simpel (tidak perlu file Mailable baru agar cepat)
+            Mail::raw("Kode OTP verifikasi AyokMain Anda adalah: {$sessionOtp}. Kode ini berlaku selama 5 menit.", function ($message) use ($request) {
+                $message->to($request->email)
+                        ->subject("Kode OTP Darurat AyokMain");
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Kode OTP berhasil dikirim ke email Anda! Silakan cek inbox atau folder spam.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengirim email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
     // 1. Fungsi untuk Verifikasi OTP (Pindahan dari controller lama)
     public function verifyOtp(Request $request)
     {

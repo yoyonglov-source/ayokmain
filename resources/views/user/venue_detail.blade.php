@@ -251,6 +251,17 @@
                         <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
                         <span x-text="modalLoading ? 'Memverifikasi...' : 'Verifikasi Kode'"></span>
                     </button>
+                    <div class="text-center pt-1" x-show="showEmailFallback" x-transition>
+                        <button type="button" @click="modalStep = 'fallback_email'; modalError = ''" class="text-xs text-red-600 hover:text-red-800 hover:underline font-bold transition">
+                            ⚠️ WA Belum Masuk? Klik di sini untuk Kirim via Email
+                        </button>
+                    </div>
+                    
+                    <div class="text-center pt-1" x-show="!showEmailFallback">
+                        <span class="text-[11px] text-gray-400 font-medium">
+                            Tunggu <span class="font-bold text-gray-600" x-text="countdownToEmail"></span> detik untuk opsi kirim via Email...
+                        </span>
+                    </div>
                     <button type="button" @click="modalStep = 'phone'" :disabled="modalLoading" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 font-medium">← Ubah Nomor HP</button>
                 </div>
             </div>
@@ -270,6 +281,22 @@
                         <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
                         <span x-text="modalLoading ? 'Memproses Booking...' : 'Simpan & Bayar Sekarang'"></span>
                     </button>
+                </div>
+            </div>
+
+            <!-- STEP BARU: INPUT EMAIL CADANGAN -->
+            <div x-show="modalStep === 'fallback_email'">
+                <p class="text-sm text-gray-500 mb-4">Masukkan email aktif Anda. Sistem akan mengalihkan pengiriman kode OTP ke kotak masuk email Anda.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alamat Email Cadangan</label>
+                        <input type="email" x-model="userFallbackEmail" placeholder="contoh@email.com" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <button type="button" @click="handleSendOtpEmail()" :disabled="modalLoading" class="w-full bg-gray-800 hover:bg-black text-white font-bold py-4 rounded-2xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                        <span x-show="modalLoading" class="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                        <span x-text="modalLoading ? 'Mengirim Email...' : 'Kirim Kode ke Email'"></span>
+                    </button>
+                    <button type="button" @click="modalStep = 'otp'" :disabled="modalLoading" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 font-medium">← Kembali ke Form OTP</button>
                 </div>
             </div>
 
@@ -311,8 +338,11 @@
             userName: '',
             userEmail: '',
             isNewUser: false,
+            showEmailFallback: false, 
+            countdownToEmail: 15,
             modalError: '',
             modalLoading: false,
+            userFallbackEmail: '',
 
             init() {
                 this.generateDates();
@@ -453,6 +483,21 @@
                     if (response.ok) {
                         this.userPhone = result.phone; // Ambil nomor ter-normalisasi dari backend
                         this.modalStep = 'otp';
+                        this.modalError = '';
+                        // RESET KONDISI TIMER CADANGAN EMAIL
+                        this.showEmailFallback = false;
+                        this.countdownToEmail = 15;
+
+                        // JALANKAN HITUNG MUNDUR 15 DETIK
+                        let emailTimer = setInterval(() => {
+                            if (this.countdownToEmail > 1) {
+                                this.countdownToEmail--;
+                            } else {
+                                // Jika sudah mencapai 0, hentikan interval dan munculkan link email
+                                this.showEmailFallback = true;
+                                clearInterval(emailTimer);
+                            }
+                        }, 1000); // Eksekusi setiap 1 detik
                     } else {
                         this.modalError = result.message || 'Gagal mengirim OTP.';
                     }
@@ -494,6 +539,40 @@
                     }
                 } catch (error) {
                     this.modalError = 'Verifikasi gagal dilakukan.';
+                } finally {
+                    this.modalLoading = false;
+                }
+            },
+
+            // FUNGSI BARU CADANGAN: KIRIM OTP KE EMAIL JIKA WA MATI
+            async handleSendOtpEmail() {
+                if (!this.userFallbackEmail) { this.modalError = 'Email wajib diisi!'; return; }
+                this.modalLoading = true;
+                this.modalError = '';
+
+                try {
+                    let response = await fetch('/checkout/send-otp-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ email: this.userFallbackEmail })
+                    });
+                    let result = await response.json();
+                    
+                    if (response.ok) {
+                        // Jika sukses, kembalikan user ke step input OTP
+                        // Dan otomatis isi field userEmail pendaftaran jaga-jaga kalau dia user baru
+                        this.userEmail = this.userFallbackEmail; 
+                        this.modalError = '';
+                        alert(result.message); // Notifikasi sukses kirim email
+                        this.modalStep = 'otp'; 
+                    } else {
+                        this.modalError = result.message || 'Gagal mengirim OTP ke Email.';
+                    }
+                } catch (error) {
+                    this.modalError = 'Terjadi kesalahan sistem saat mengirim email.';
                 } finally {
                     this.modalLoading = false;
                 }
