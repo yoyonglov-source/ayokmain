@@ -56,8 +56,9 @@ class AuthController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string',
-            'otp'   => 'required|string|size:4'
+            'phone'  => 'required|string',
+            'otp'    => 'required|string|size:4',
+            'action' => 'nullable|string' // Kita tambah validasi action (opsional)
         ]);
 
         $phone = $request->phone;
@@ -85,16 +86,18 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // OTP BENAR! Jangan hapus session phone dulu karena kita butuh untuk step storeUser
-        // Cukup hapus session code agar tidak di-re-use
+        // OTP BENAR! Cukup hapus session code agar tidak di-re-use
         session()->forget('otp_code');
 
         // Cari tahu apakah nomor ini sudah ada di tabel users
         $user = User::where('phone', $phone)->first();
 
         if ($user) {
-            // CASE A: User Lama -> Langsung Loginkan & Auto-fill
+            // CASE A: User Lama -> Langsung Loginkan
             Auth::login($user);
+            
+            // WAJIB UNTUK LARAVEL 11: Regenerate session agar login-nya mengunci rapat di browser!
+            $request->session()->regenerate();
             
             // Bersihkan sisa session karena sudah login
             session()->forget(['otp_phone', 'otp_expires_at']);
@@ -111,7 +114,16 @@ class AuthController extends Controller
             ]);
         }
 
-        // CASE B: User Baru -> Perintahkan frontend buka form Nama & Email
+        // PENJAGA GAWANG KHUSUS HALAMAN LOGIN HISTORY
+        // Jika request datang dari proses login biasa dan user TIDAK ditemukan di DB
+        if ($request->action === 'login') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Nomor WhatsApp Anda belum terdaftar di AyokMain. Silakan lakukan booking lapangan terlebih dahulu.'
+            ], 422);
+        }
+
+        // CASE B: User Baru (Khusus jalur Checkout) -> Perintahkan frontend buka form Nama & Email
         return response()->json([
             'status' => 'success',
             'is_new_user' => true,

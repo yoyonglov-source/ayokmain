@@ -83,10 +83,13 @@ Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('chec
 // ==========================================
 // PROFILE & AUTH (BAWAAN BREEZE)
 // ==========================================
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/my-bookings', [App\Http\Controllers\User\BookingHistoryController::class, 'index'])->name('user.bookings.index');
+    Route::get('/my-bookings/{id}', [App\Http\Controllers\User\BookingHistoryController::class, 'show'])->name('user.bookings.show');
     
     // Route baru untuk halaman invoice simulasi
     Route::post('/checkout/pay/{id}', [CheckoutController::class, 'pay'])->name('checkout.pay');
@@ -95,3 +98,6 @@ Route::middleware('auth')->group(function () {
 
 // WAJIB ADA: Memanggil rute login, register, logout dari file auth.php
 require __DIR__.'/auth.php';
+Route::get('/login', function () {
+    return view('auth.login_otp');
+})->name('login');

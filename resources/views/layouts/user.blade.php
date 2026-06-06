@@ -28,6 +28,23 @@
             <div class="hidden md:flex gap-6 text-sm font-semibold text-gray-500">
                 <a href="{{ url('/') }}" class="text-brand border-b-2 border-brand pb-1">Sewa Venue</a>
                 <a href="#" class="hover:text-brand transition">Partner With Us</a>
+                @auth
+                    <!-- Muncul jika user sudah login setelah verifikasi OTP -->
+                    <a href="{{ route('user.bookings.index') }}" class="text-sm font-bold text-[#0d8173] hover:underline">
+                        Bookingan Saya
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="text-xs font-semibold text-red-500 hover:text-red-700 ml-2">
+                            Keluar
+                        </button>
+                    </form>
+                @else
+                    <!-- Muncul jika user adalah pengunjung baru / belum login -->
+                    <a href="{{ route('login') }}" class="bg-[#0d8173] hover:bg-[#0a665b] text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">
+                        Cek Tiket / Masuk
+                    </a>
+                @endauth
             </div>
         </div>
         <div class="flex gap-3 items-center">
