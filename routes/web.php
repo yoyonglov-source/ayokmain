@@ -101,3 +101,9 @@ require __DIR__.'/auth.php';
 Route::get('/login', function () {
     return view('auth.login_otp');
 })->name('login');
+
+// ROUTE REGISTRASI PARTNER / OWNER GOR (GUEST)
+// =======================================================
+Route::get('/register-owner', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'create'])->name('register.owner');
+Route::post('/register-owner', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'store'])->name('register.owner.store');
+Route::get('/register-owner/pending', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'pending'])->name('register.owner.pending');
