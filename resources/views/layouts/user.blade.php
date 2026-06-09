@@ -51,8 +51,9 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="text-sm font-bold text-gray-600 px-4">Dashboard</a>
             @else
-                <a href="{{ route('login') }}" class="text-sm font-bold text-gray-600 px-3 uppercase">Masuk</a>
-                <a href="{{ route('register') }}" class="bg-brand text-white px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition uppercase">Daftar</a>
+                <a href="{{ route('admin.login') }}" class="bg-[#047857] hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded-lg text-sm uppercase tracking-wider transition duration-150">
+                    Portal Owner
+                </a>
             @endauth
         </div>
     </nav>

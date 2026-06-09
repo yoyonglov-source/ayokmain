@@ -67,29 +67,9 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link URL Google Maps Lapangan</label>
                     <input type="url" name="google_maps_url" placeholder="https://maps.google.com/..." required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-teal-500 text-sm">
-                    <p class="text-[11px] text-gray-400 mt-1">Penting: Tim AyokMain akan melakukan pengecekan fisik lewat titik koordinat ini.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Penting: Tim AyokMain akan melakukan pengecekan lewat titik koordinat ini.</p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Kategori Olahraga Utama</label>
-                        <select name="category" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-teal-500 text-sm">
-                            <option value="Badminton">Badminton</option>
-                            <option value="Padel">Padel</option>
-                            <option value="Futsal">Futsal</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Kota / Kabupaten</label>
-                        <input type="text" name="city" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-teal-500 text-sm">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Alamat Lengkap</label>
-                    <textarea name="address" rows="2" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-teal-500 text-sm"></textarea>
-                </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nomor Kontak GOR (WhatsApp)</label>
                     <input type="text" name="phone_number" placeholder="08123456xxx" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-teal-500 text-sm">

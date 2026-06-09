@@ -107,3 +107,9 @@ Route::get('/login', function () {
 Route::get('/register-owner', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'create'])->name('register.owner');
 Route::post('/register-owner', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'store'])->name('register.owner.store');
 Route::get('/register-owner/pending', [App\Http\Controllers\Auth\OwnerRegisterController::class, 'pending'])->name('register.owner.pending');
+
+// PINTU MASUK LOGIN KHUSUS ADMIN / OWNER GOR
+// =======================================================
+Route::get('/admin/login', function () {
+    return view('auth.login'); // Memanggil kembali halaman login email-password bawaan Breeze
+})->name('admin.login');

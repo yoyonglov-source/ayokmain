@@ -30,9 +30,6 @@ class OwnerRegisterController extends Controller
             'selfie_photo' => 'required|image|mimes:jpeg,png,jpg|max:4096',
             'venue_name' => 'required|string|max:255',
             'google_maps_url' => 'required|url',
-            'category' => 'required|string',
-            'city' => 'required|string|max:255',
-            'address' => 'required|string',
             'phone_number' => 'required|string|max:20',
         ]);
 
@@ -67,8 +64,13 @@ class OwnerRegisterController extends Controller
                 'role' => 'owner', // Kunci role sebagai owner
                 'ktp_number' => $request->ktp_number,
                 'ktp_photo' => $ktpPath,
+                'phone' => $request->phone_number,
                 'selfie_photo' => $selfiePath,
                 'verification_status' => 'pending', // Taktik pengamanan: wajib nunggu verifikasi Yoyon
+                'role' => 'owner', 
+                'ktp_number' => $request->ktp_number,
+                'ktp_photo' => $ktpPath,
+                'selfie_photo' => $selfiePath,
             ]);
 
             // 4. Simpan Data Gedung/Venue Awal Milik Owner Tersebut
@@ -76,10 +78,10 @@ class OwnerRegisterController extends Controller
                 'user_id' => $user->id,
                 'name' => $request->venue_name,
                 'slug' => Str::slug($request->venue_name) . '-' . Str::random(4),
-                'category' => $request->category,
-                'address' => $request->address,
+                'category' => '-',
+                'address' => '-',
                 'google_maps_url' => $request->google_maps_url,
-                'city' => $request->city,
+                'city' => '-',
                 'phone_number' => $request->phone_number,
                 'is_active' => false, // Nonaktifkan dulu agar tidak muncul di halaman depan user penonton
             ]);

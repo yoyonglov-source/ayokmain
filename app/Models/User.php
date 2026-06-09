@@ -23,6 +23,11 @@ class User extends Authenticatable
         'password',
         'phone',     
         'is_admin',
+        'role',                
+        'ktp_number',          
+        'ktp_photo',           
+        'selfie_photo',        
+        'verification_status',
     ];
 
     /**

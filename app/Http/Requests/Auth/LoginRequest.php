@@ -49,6 +49,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user->role === 'owner' && $user->verification_status !== 'approved') {
+            Auth::logout(); // Keluarkan kembali secara paksa
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Owner Anda masih dalam proses peninjauan (Pending) atau ditolak. Silakan tunggu verifikasi tim AyokMain.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
