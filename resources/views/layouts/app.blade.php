@@ -39,16 +39,17 @@
 
         <nav class="flex-1 px-4 py-4 space-y-1 text-sm overflow-y-auto">
 
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition">
-                <i class="fa-solid fa-gauge-high opacity-70 w-5"></i>
-                <span>Dashboard</span>
-            </a>
+            <a href="{{ route('dashboard') }}" 
+                class="flex items-center space-x-3 px-4 py-3 rounded-xl transition {{ request()->routeIs('dashboard') ? 'bg-emerald-600/40 border border-emerald-500/30 font-medium' : 'hover:bg-emerald-700/50 opacity-70' }}">
+                    <i class="fa-solid fa-gauge-high w-5"></i>
+                    <span>Dashboard</span>
+                </a>
 
-            <a href="{{ route('admin.venues.index') }}" 
-                class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-emerald-600/40 border border-emerald-500/30 shadow-sm">
-                <i class="fa-solid fa-building opacity-100 w-5"></i>
-                <span class="font-medium">Gedung Saya</span>
-            </a>
+                <a href="{{ route('admin.venues.index') }}" 
+                class="flex items-center space-x-3 px-4 py-3 rounded-xl transition {{ request()->routeIs('admin.venues.*') ? 'bg-emerald-600/40 border border-emerald-500/30 font-medium' : 'hover:bg-emerald-700/50 opacity-70' }}">
+                    <i class="fa-solid fa-building w-5"></i>
+                    <span>Gedung Saya</span>
+                </a>
 
             <a href="#" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition group">
                 <div class="flex items-center space-x-3">
@@ -124,8 +125,12 @@
                 </button>
                 
                 <div class="flex flex-col">
-                    <h1 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">Gedung Saya</h1>
-                    <p class="hidden sm:block text-[11px] text-gray-400">Kelola daftar venue olahraga yang Anda miliki</p>
+                    <h1 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
+                        {{ request()->routeIs('dashboard') ? 'Dashboard Utama' : 'Gedung Saya' }}
+                    </h1>
+                    <p class="hidden sm:block text-[11px] text-gray-400">
+                        {{ request()->routeIs('dashboard') ? 'Ringkasan performa bisnis GOR Anda bulan ini' : 'Kelola daftar venue olahraga yang Anda miliki' }}
+                    </p>
                 </div>
             </div>
         </header>

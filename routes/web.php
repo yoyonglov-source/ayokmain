@@ -16,9 +16,11 @@ use App\Http\Controllers\AuthController;
 // ==========================================
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     
-    Route::get('/', function () {
+    /*Route::get('/', function () {
         return view('dashboard');
-    })->name('dashboard');
+    })->name('dashboard');*/
+
+    Route::get('/', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
 
     // --- PENGATURAN (Settings) ---
     Route::prefix('settings')->group(function () {
