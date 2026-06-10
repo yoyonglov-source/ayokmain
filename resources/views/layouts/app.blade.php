@@ -59,7 +59,7 @@
                 <span class="bg-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">3</span>
             </a>
 
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition border-b border-emerald-700/50 pb-4 mb-2">
+            <a href="{{ route('admin.financial.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition border-b border-emerald-700/50 pb-4 mb-2">
                 <i class="fa-solid fa-money-bill-trend-up opacity-70 w-5"></i>
                 <span>Laporan Keuangan</span>
             </a>
@@ -126,10 +126,22 @@
                 
                 <div class="flex flex-col">
                     <h1 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
-                        {{ request()->routeIs('dashboard') ? 'Dashboard Utama' : 'Gedung Saya' }}
+                        @if(request()->routeIs('dashboard'))
+                            Dashboard Utama
+                        @elseif(request()->routeIs('admin.financial.index'))
+                            Laporan Keuangan
+                        @else
+                            Gedung Saya
+                        @endif
                     </h1>
                     <p class="hidden sm:block text-[11px] text-gray-400">
-                        {{ request()->routeIs('dashboard') ? 'Ringkasan performa bisnis GOR Anda bulan ini' : 'Kelola daftar venue olahraga yang Anda miliki' }}
+                        @if(request()->routeIs('dashboard'))
+                            Ringkasan performa bisnis GOR Anda bulan ini
+                        @elseif(request()->routeIs('admin.financial.index'))
+                            Analisis menyeluruh pendapatan bisnis GOR Anda
+                        @else
+                            Kelola daftar venue olahraga yang Anda miliki
+                        @endif
                     </p>
                 </div>
             </div>
