@@ -111,6 +111,7 @@ class CheckoutController extends Controller
             $booking = Booking::create([
                 'user_id'          => $user->id,
                 'venue_id'         => $venueId,
+                'field_id'         => $field->id,
                 'booking_date'     => $request->booking_date,
                 'base_price'       => $basePrice,
                 'app_fee'          => $appFee,

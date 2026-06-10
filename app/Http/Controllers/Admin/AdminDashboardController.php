@@ -32,7 +32,24 @@ class AdminDashboardController extends Controller
         ->whereDate('booking_date', Carbon::today()) 
         ->count(); // Menggunakan count() karena kita mau tahu jumlah lapangannya, bukan uangnya
 
-    // Kirim kedua variabel ke view dashboard
-        return view('dashboard', compact('totalPendapatanBulanIni', 'lapanganTerpakaiHariIni'));
+    //Mengambil 5 Data Booking Terbaru
+    $bookingTerbaru = Booking::whereHas('venue', function ($query) use ($ownerId) {
+            $query->where('user_id', $ownerId);
+        })
+        ->latest() // Mengurutkan dari yang paling baru dibuat
+        ->take(5)  // Ambil 5 data saja
+        ->get();
+
+    //Mengambil Lapangan beserta Jumlah Booking Suksesnya
+    $statistikLapangan = \App\Models\Field::whereHas('venue', function ($query) use ($ownerId) {
+        $query->where('user_id', $ownerId);
+    })
+        ->withCount(['bookings' => function ($query) {
+            $query->where('status', 'success'); // Hanya menghitung booking yang sukses/lunas
+        }])
+        ->get();    
+
+    // Kirim ketiga variabel ke view dashboard
+    return view('dashboard', compact('totalPendapatanBulanIni', 'lapanganTerpakaiHariIni', 'bookingTerbaru','statistikLapangan'));
     }
 }
