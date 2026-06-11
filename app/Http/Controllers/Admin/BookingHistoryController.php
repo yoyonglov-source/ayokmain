@@ -27,7 +27,7 @@ class BookingHistoryController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'LIKE', "%{$search}%")
-                  ->orWhere('booking_code', 'LIKE', "%{$search}%")
+                  ->orWhere('booking_id', 'LIKE', "%{$search}%")
                   ->orWhereHas('user', function ($u) use ($search) {
                       $u->where('name', 'LIKE', "%{$search}%");
                   });
