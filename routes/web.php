@@ -21,9 +21,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         return view('dashboard');
     })->name('dashboard');*/
     Route::get('/laporan-keuangan', [\App\Http\Controllers\Admin\FinancialReportController::class, 'index'])->name('admin.financial.index');
-
+    Route::get('/riwayat-booking', [\App\Http\Controllers\Admin\BookingHistoryController::class, 'index'])->name('admin.booking.history');
     Route::get('/', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
-    
+        
     // --- PENGATURAN (Settings) ---
     Route::prefix('settings')->group(function () {
         Route::get('/operating-hours', [SettingController::class, 'index'])->name('settings.operating-hours');

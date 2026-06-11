@@ -64,7 +64,8 @@
                 <thead>
                     <tr class="border-b border-gray-100 text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-50/50">
                         <th class="px-6 py-4">Tanggal Transaksi</th>
-                        <th class="px-6 py-4">Kode Booking</th>
+                        <th class="px-6 py-4">Booking & Customer</th>
+                        <th class="px-6 py-4">Lapangan</th>
                         <th class="px-6 py-4">Metode</th>
                         <th class="px-6 py-4 text-right">Omzet Kotor</th>
                         <th class="px-6 py-4 text-right text-emerald-700 bg-emerald-50/30">Net Profit Owner</th>
@@ -76,8 +77,16 @@
                             <td class="px-6 py-4 text-xs font-medium">
                                 {{ \Carbon\Carbon::parse($report->created_at)->format('d M Y H:i') }}
                             </td>
-                            <td class="px-6 py-4 font-mono font-bold text-gray-700">
-                                #{{ $report->booking_code ?? $report->id }}
+                            <td class="px-6 py-4">
+                                <!-- Teks Stacked: Kode Booking di atas, Nama Customer di bawah -->
+                                <div class="font-mono font-bold text-gray-700">#{{ $report->booking_code ?? $report->id }}</div>
+                                <div class="text-xs text-gray-400 font-medium mt-0.5">{{ $report->user->name ?? 'Walk-in / Guest' }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <!-- Menampilkan info nama lapangan secara clean -->
+                                <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-full">
+                                    {{ $report->details->first()->field->name ?? 'Semua Lapangan' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-md uppercase">
@@ -93,11 +102,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">
                                 Tidak ada data transaksi sukses ditemukan pada rentang tanggal ini.
                             </td>
                         </tr>
-                    @endempty
+                    @endforelse
                 </tbody>
             </table>
         </div>

@@ -31,8 +31,10 @@ class FinancialReportController extends Controller
         $totalPendapatanBersih = (clone $query)->sum('net_profit_owner');
         $totalTransaksi = (clone $query)->count();
 
-        // 📋 Ambil list datanya untuk isi tabel laporan
-        $reports = $query->orderBy('created_at', 'desc')->get();
+        // 📋 Ambil list datanya untuk isi tabel laporan beserta relasi detail lapangannya (Eager Loading)
+        $reports = $query->with(['user', 'details.field', 'venue']) // <-- Tambah baris ini di sini, Captain!
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('admin.financial.index', compact(
             'reports',

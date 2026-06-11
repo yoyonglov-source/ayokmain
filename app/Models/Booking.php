@@ -50,4 +50,10 @@ class Booking extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function details()
+    {
+    // Mengubungkan ke tabel booking_details berdasarkan booking_id
+        return $this->hasMany(BookingDetail::class, 'booking_id'); 
+    }
 }

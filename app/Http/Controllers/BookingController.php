@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Venue;
+use App\Models\Field; // <-- 1. Kita panggil Model Field di sini
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Services\BookingService;
@@ -41,15 +42,19 @@ class BookingController extends Controller
         // 2. Ambil Setting Venue
         $venue = Venue::findOrFail($request->venue_id);
 
-        // 4. Hitung Breakdown Biaya via Service
-        $basePrice = 50000; 
+        // 3. Ambil Data Lapangan secara Spesifik dari Database
+        $field = Field::findOrFail($request->field_id);
+
+        // 4. Hitung Breakdown Biaya via Service secara Dinamis
+        // Mengambil harga asli dari kolom database, bukan di-hardcode lagi!
+        $basePrice = $field->price; 
         $calculation = $this->bookingService->calculateTotal($basePrice, $venue);
 
         // 5. Simpan ke Database
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'venue_id' => $request->venue_id,
-            'field_id' => $request->field_id,
+            'field_id' => $field->id, // <-- Sekarang aman, variabel $field sudah terdefinisi di atas!
             'booking_date' => $request->booking_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,

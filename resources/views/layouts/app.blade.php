@@ -51,12 +51,11 @@
                     <span>Gedung Saya</span>
                 </a>
 
-            <a href="#" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition group">
+            <a href="{{ route('admin.booking.history') }}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition group">
                 <div class="flex items-center space-x-3">
                     <i class="fa-solid fa-calendar-check opacity-70 w-5"></i>
                     <span>Booking Masuk</span>
                 </div>
-                <span class="bg-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">3</span>
             </a>
 
             <a href="{{ route('admin.financial.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition border-b border-emerald-700/50 pb-4 mb-2">
@@ -130,6 +129,8 @@
                             Dashboard Utama
                         @elseif(request()->routeIs('admin.financial.index'))
                             Laporan Keuangan
+                        @elseif(request()->routeIs('admin.booking.history'))
+                            Riwayat Booking    
                         @else
                             Gedung Saya
                         @endif
@@ -139,6 +140,8 @@
                             Ringkasan performa bisnis GOR Anda bulan ini
                         @elseif(request()->routeIs('admin.financial.index'))
                             Analisis menyeluruh pendapatan bisnis GOR Anda
+                        @elseif(request()->routeIs('admin.booking.history'))
+                            Pantau dan telusuri seluruh riwayat transaksi serta jadwal sewa lapangan
                         @else
                             Kelola daftar venue olahraga yang Anda miliki
                         @endif
