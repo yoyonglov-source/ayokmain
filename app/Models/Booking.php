@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Booking extends Model
 {
@@ -25,8 +26,17 @@ class Booking extends Model
         'payment_method',
         'total_amount',
         'net_profit_owner',
+        'uuid',
         'status',
     ];
+
+    // 🌟 3. Otomatis generate UUID setiap kali ada data Booking baru dibuat
+    protected static function booted()
+    {
+        static::creating(function ($booking) {
+            $booking->uuid = (string) Str::uuid();
+        });
+    }
 
     // Relasi ke Venue agar kita bisa tarik nama gedung di invoice
     public function venue()

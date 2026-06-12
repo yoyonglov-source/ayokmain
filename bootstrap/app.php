@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -16,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         'checkout/send-otp',  // Sesuaikan dengan URL route OTP kamu
         'checkout/verify-otp', // Sesuaikan dengan URL route verifikasi kamu
         'checkout/send-otp-email',
-        'checkout/store'
+        'checkout/store',
+        'api/xendit/callback'
         ]);
         $middleware->redirectTo(function (Request $request) {
             return route('login');

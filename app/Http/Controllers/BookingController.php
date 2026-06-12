@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Venue;
-use App\Models\Field; // <-- 1. Kita panggil Model Field di sini
+use App\Models\Field; 
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Services\BookingService;
@@ -18,11 +18,11 @@ class BookingController extends Controller
         $this->bookingService = $bookingService;
     }
 
-    // Ini pintu yang tadi hilang, Captain!
+    // 🌟 1. PERUBAHAN DI SINI: Sekarang pintu checkout membaca UUID dari URL browser
     public function checkout($booking_id)
     {
-        // Kita ambil data booking beserta data gedungnya (venue)
-        $booking = Booking::with('venue')->findOrFail($booking_id);
+        // Kita ubah findOrFail jadi query where('uuid') agar mencari berdasarkan string acak UUID-nya
+        $booking = Booking::with('venue')->where('uuid', $booking_id)->firstOrFail();
 
         // Kita arahkan ke file resources/views/user/checkout.blade.php
         return view('user.checkout', compact('booking'));
@@ -46,15 +46,14 @@ class BookingController extends Controller
         $field = Field::findOrFail($request->field_id);
 
         // 4. Hitung Breakdown Biaya via Service secara Dinamis
-        // Mengambil harga asli dari kolom database, bukan di-hardcode lagi!
         $basePrice = $field->price; 
         $calculation = $this->bookingService->calculateTotal($basePrice, $venue);
 
-        // 5. Simpan ke Database
+        // 5. Simpan ke Database (Kolom uuid otomatis terisi berkat fungsi booted di model)
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'venue_id' => $request->venue_id,
-            'field_id' => $field->id, // <-- Sekarang aman, variabel $field sudah terdefinisi di atas!
+            'field_id' => $field->id, 
             'booking_date' => $request->booking_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
@@ -70,6 +69,7 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('checkout.show', $booking->id);
+        // 🌟 2. PERUBAHAN DI SINI: Redirect dilempar menggunakan UUID ke rute 'checkout'
+        return redirect()->route('checkout', $booking->uuid);
     }
 }
