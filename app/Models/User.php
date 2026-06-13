@@ -28,6 +28,7 @@ class User extends Authenticatable
         'ktp_photo',           
         'selfie_photo',        
         'verification_status',
+        'owner_id',
     ];
 
     /**
@@ -56,6 +57,18 @@ class User extends Authenticatable
     public function venues()
     {
         return $this->hasMany(Venue::class);
+    }
+
+    // 👨‍💼 Relasi untuk Staff: Mengetahui siapa Boss / Owner dari staff ini
+    public function owner()
+    {
+        return $table->belongsTo(User::class, 'owner_id');
+    }
+
+    // 👥 Relasi untuk Owner: Mengambil semua daftar staff yang dimiliki oleh Owner ini
+    public function staffs()
+    {
+        return $this->hasMany(User::class, 'owner_id');
     }
 
 }

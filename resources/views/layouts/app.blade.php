@@ -63,7 +63,7 @@
                 <span>Laporan Keuangan</span>
             </a>
 
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition border-b border-emerald-700/50 pb-4 mb-2">
+            <a href="{{ route('admin.staff.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-emerald-700/50 transition border-b border-emerald-700/50 pb-4 mb-2">
                 <i class="fa-solid fa-users-gear opacity-70 w-5"></i>
                 <span>Manajemen Staff</span>
             </a>
@@ -131,6 +131,8 @@
                             Laporan Keuangan
                         @elseif(request()->routeIs('admin.booking.history'))
                             Riwayat Booking    
+                        @elseif(request()->routeIs('admin.staff.*')) {{-- 👥 Tambahan kondisi di sini --}}
+                            Manajemen Staff
                         @else
                             Gedung Saya
                         @endif
@@ -142,6 +144,8 @@
                             Analisis menyeluruh pendapatan bisnis GOR Anda
                         @elseif(request()->routeIs('admin.booking.history'))
                             Pantau dan telusuri seluruh riwayat transaksi serta jadwal sewa lapangan
+                        @elseif(request()->routeIs('admin.staff.*')) {{-- 👥 Tambahan sub-title di sini --}}
+                            Kelola akun dan hak akses pegawai atau kasir GOR Anda
                         @else
                             Kelola daftar venue olahraga yang Anda miliki
                         @endif

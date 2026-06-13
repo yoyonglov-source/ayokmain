@@ -11,7 +11,7 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\StaffController;
 
 // AREA ADMIN / OWNER (BUTUH LOGIN)
 // ==========================================
@@ -23,6 +23,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/laporan-keuangan', [\App\Http\Controllers\Admin\FinancialReportController::class, 'index'])->name('admin.financial.index');
     Route::get('/riwayat-booking', [\App\Http\Controllers\Admin\BookingHistoryController::class, 'index'])->name('admin.booking.history');
     Route::get('/', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // 🟢 UPDATE KODE DI WEB.PHP KAMU JADI SEPERTI INI:
+    Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('admin.staff.index');
+    Route::get('/staff/create', [\App\Http\Controllers\Admin\StaffController::class, 'create'])->name('admin.staff.create');
+    Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->name('admin.staff.store');
+    Route::delete('/staff/{id}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->name('admin.staff.destroy');
         
     // --- PENGATURAN (Settings) ---
     Route::prefix('settings')->group(function () {
